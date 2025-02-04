@@ -24,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/christoph-elfmann/pae-viewer/issues"
   },
-  "homepage": "https://github.com/christoph-elfmann/pae-viewer#readme"
+  "homepage": "https://github.com/christoph-elfmann/pae-viewer#readme",
+  "devDependencies": {
+    "prettier": "^3.4.2"
+  }
 }
