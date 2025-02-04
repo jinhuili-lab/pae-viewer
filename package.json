@@ -1,0 +1,28 @@
+{
+  "name": "pae-viewer",
+  "version": "0.0.1",
+  "description": "Interactive display for the PAE (Predicted Aligned Error) of AlphaFold predictions.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/christoph-elfmann/pae-viewer.git"
+  },
+  "keywords": [
+    "pae",
+    "alphafold",
+    "structure",
+    "prediction",
+    "visualization",
+    "interactive",
+    "matrix"
+  ],
+  "author": "Christoph Elfmann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/christoph-elfmann/pae-viewer/issues"
+  },
+  "homepage": "https://github.com/christoph-elfmann/pae-viewer#readme"
+}
