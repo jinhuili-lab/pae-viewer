@@ -1956,3 +1956,87 @@ const template = `
   </div>
 </template>
 `
+
+interface PaeViewerStyle {
+  general: {
+    fontFamily: string;
+  };
+  defaults: {
+    chartColor: string;
+    chartLineThickness: string;
+    fontSize: string;
+    selectionOutlineColor: string;
+    markerOutlineColor: string;
+    markerOutlineThickness: string;
+    markerSize: string;
+  };
+  elements: {
+    axes: {
+      color: string;
+      thickness: string;
+    };
+    boxes: {
+      roundness: string;
+      color: string;
+      opacity: string;
+    };
+    dividers: {
+      color: string;
+      thickness: string;
+    };
+    ticks: {
+      unitInterval: string;
+      fontSize: string;
+      color: string;
+      thickness: string;
+      labelGap: string;
+      units: {
+        length: string;
+      };
+      subunits: {
+        length: string;
+      };
+    };
+    subunitLabels: {
+      gap: string;
+      fontWeight: string;
+      fontStyle: string;
+      color: string;
+    };
+    regions: {
+      opacity: string;
+      fontSize: string;
+    };
+    selection: {
+      lines: {
+        color: string;
+        thickness: string;
+        dashLength: string;
+      };
+      markers: {
+        outlineColor: string;
+        outlineThickness: string;
+        size: string;
+      };
+      rect: {
+        color: string;
+        opacity: string;
+      };
+      colors: {
+        x: string;
+        y: string;
+        overlap: string;
+      };
+    };
+    crosslinks: {
+      outlineColor: string;
+      outlineThickness: string;
+      opacity: string;
+      size: string;
+      restraintColors: {
+        satisfied: string;
+        violated: string;
+      };
+    };
+  };
+}
