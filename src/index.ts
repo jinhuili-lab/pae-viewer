@@ -271,8 +271,12 @@ export class PaeViewer {
   private _updateStyle(style) {
     const updateObject = (base, update, keys = []) => {
       const [baseKeys, updateKeys] = [base, update].map(
-        (obj) => new Set(Object.entries(obj).map(([key, _) => key))
-      );
+        (obj) => new Set(Object.entries(obj).map(([key, _)
+    =>
+      key;
+    ))
+    )
+      ;
 
       const unrecognizedKeys = [
         ...new Set([...updateKeys].filter((key) => !baseKeys.has(key)))
@@ -1931,7 +1935,7 @@ const template = `
     </div>
   </div>
 </template>
-`
+`;
 
 interface PaeViewerStyle {
   general: {
@@ -2016,3 +2020,16 @@ interface PaeViewerStyle {
     };
   };
 }
+
+
+// modified from Okabe_Ito
+const subunitColors = [
+  "#991999", // PyMol deeppurple (0.6, 0.1, 0.6)
+  "#00BFBF", // PyMol teal (0, 0.75, 0.75)
+  "#e9967a", // salmon
+  "#009e73",
+  "#f0e442",
+  "#0072b2",
+  "#d55e00",
+  "#cc79a7"
+];
