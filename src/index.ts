@@ -134,30 +134,6 @@ export class PaeViewer {
     }
   };
 
-  static codeMapping = {
-    A: "Ala",
-    R: "Arg",
-    N: "Asn",
-    D: "Asp",
-    B: "Asx",
-    C: "Cys",
-    E: "Glu",
-    Q: "Gln",
-    Z: "Glx",
-    G: "Gly",
-    H: "His",
-    I: "Ile",
-    L: "Leu",
-    K: "Lys",
-    M: "Met",
-    F: "Phe",
-    P: "Pro",
-    S: "Ser",
-    T: "Thr",
-    W: "Trp",
-    Y: "Tyr",
-    V: "Val"
-  };
 
   constructor(
     root,
@@ -295,7 +271,7 @@ export class PaeViewer {
   private _updateStyle(style) {
     const updateObject = (base, update, keys = []) => {
       const [baseKeys, updateKeys] = [base, update].map(
-        (obj) => new Set(Object.entries(obj).map(([key, private _]) => key))
+        (obj) => new Set(Object.entries(obj).map(([key, _) => key))
       );
 
       const unrecognizedKeys = [
