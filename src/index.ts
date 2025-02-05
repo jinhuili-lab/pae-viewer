@@ -1,6 +1,4 @@
 import * as Utils from "./utils.js";
-import { subunitColors } from "./structure-style.js";
-import { readStructure } from "./read-structure.js";
 
 export class PaeViewer {
   private _root;
@@ -388,16 +386,6 @@ export class PaeViewer {
     }
 
     this._drawPaeColorScale(complex.maxPae ?? 31.75);
-
-    if (complex.members && !complex.members[0].sequence) {
-      readStructure(directory + complex.structureFile, null).then(
-        (structure) => {
-          for (let i = 0; i < structure.chains.length; i++) {
-            complex.members[i].sequence = structure.chains[i].sequence;
-          }
-        }
-      );
-    }
 
     const sequenceLengths = complex.members.map((member) => member.length);
     this._dim = Utils.sum(sequenceLengths);
