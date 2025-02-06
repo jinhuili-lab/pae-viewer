@@ -1,7 +1,33 @@
 import { Utils } from "./utils";
 import chroma from "chroma-js";
 
-export class PaeViewer {
+
+export interface Residue {
+  symbol: string;
+  name?: string;
+}
+
+export interface Entity<R extends Residue = Residue> {
+  id: any;
+  name?: string;
+  sequence: R[];
+}
+
+export interface Crosslink<E extends Entity = Entity> {
+  source: RelativeIndex<E>;
+  target: RelativeIndex<E>;
+}
+
+export interface RelativeIndex<E extends Entity = Entity> {
+  entity: Entity;
+  index: number;
+}
+
+export class PaeViewer<
+  R extends Residue = Residue,
+  E extends Entity = Entity,
+  C extends Crosslink = Crosslink
+> {
   private _root;
   private _template;
   private _element;
