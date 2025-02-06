@@ -1,6 +1,6 @@
 import { Utils } from "./utils";
 import chroma from "chroma-js";
-
+import { saveAs } from 'file-saver';
 
 export interface Residue {
   symbol: string;
