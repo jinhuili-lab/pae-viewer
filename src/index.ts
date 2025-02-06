@@ -1,4 +1,5 @@
 import { Utils } from "./utils";
+import chroma from "chroma-js";
 
 export class PaeViewer {
   private _root;
@@ -31,7 +32,8 @@ export class PaeViewer {
   private _viewBox;
   private _colorMapping = null;
   private _colorRange = subunitColors;
-  private _paePalette = chroma
+
+  private _paePalette = (chroma as any)
     .cubehelix()
     .start(120)
     .rotations(0)
