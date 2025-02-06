@@ -1,5 +1,5 @@
 export class Utils {
-  public static createRandomId(prefix = "") {
+  public static createRandomId(prefix: string = ""): string {
     if (prefix) {
       prefix += "-";
     }
@@ -7,11 +7,11 @@ export class Utils {
     return prefix + Math.random().toString(36).slice(2);
   }
 
-  public static positiveModulo(x, n) {
+  public static positiveModulo(x: number, n: number): number {
     return ((x % n) + n) % n;
   }
 
-  public static splitLines(text) {
+  public static splitLines(text: string): string[] {
     return text.split(/\r?\n/);
   }
 
@@ -25,10 +25,14 @@ export class Utils {
    * @param sep separator character
    * @returns {*}
    */
-  public static readDSV(dsv, headers = null, sep = "\t") {
-    let rows = splitLines(dsv)
-      .filter(line => line !== "")
-      .map(line => line.split(sep));
+  public static readDSV(
+    dsv: string,
+    headers: string[] | null = null,
+    sep: string = "\t",
+  ): Map<string, string>[] {
+    let rows = Utils.splitLines(dsv)
+      .filter((line) => line !== "")
+      .map((line) => line.split(sep));
 
     if (headers === null) {
       headers = rows[0];
@@ -40,27 +44,31 @@ export class Utils {
         throw {
           name: "MalformattedDsvRow",
           message:
-            `Malformatted DSV: while parsing a DSV with`
-            + ` ${headers.length} headers (${headers.join(",")}), row`
-            + ` {i} (${row.join(",")}) had wrong number of fields`
-            + ` (${row.length})!`,
+            `Malformatted DSV: while parsing a DSV with` +
+            ` ${headers.length} headers (${headers.join(",")}), row` +
+            ` {i} (${row.join(",")}) had wrong number of fields` +
+            ` (${row.length})!`,
           headers: headers,
           separator: sep,
           row: row,
-          index: i
+          index: i,
         };
       }
     }
 
-    return rows.map(row => new Map(row.map(
-      (value, i) => [headers[i], value])
-    ));
+    return rows.map(
+      (row) => new Map(row.map((value, i) => [headers[i], value])),
+    );
   }
 
-  public static async fetchDSV(url, columns = null, sep = "\t") {
-    return fetch(url).then(response => response.text()).then(text =>
-      readDSV(text, columns, sep)
-    );
+  public static async fetchDSV(
+    url: string,
+    columns: string[] | null = null,
+    sep: string = "\t",
+  ): Promise<Map<string, string>[]> {
+    return fetch(url)
+      .then((response) => response.text())
+      .then((text) => Utils.readDSV(text, columns, sep));
   }
 
   /**
@@ -73,51 +81,65 @@ export class Utils {
    *              elements for which the condition holds, the second one
    *              containing the rest
    */
-// based on https://codereview.stackexchange.com/a/162879
-  public static partitionOn(iter, doesConditionHold) {
-    return iter.reduce((result, element) => {
-      result[doesConditionHold(element) ? 0 : 1].push(element);
-      return result;
-    }, [[], []]);
+  // based on https://codereview.stackexchange.com/a/162879
+  public static partitionOn<T>(
+    iter: T[],
+    doesConditionHold: (value: T) => boolean,
+  ): [T[], T[]] {
+    return iter.reduce(
+      (result, element) => {
+        result[doesConditionHold(element) ? 0 : 1].push(element);
+        return result;
+      },
+      [[] as T[], [] as T[]],
+    );
   }
 
-  public static createSVG(type, cssClass = null, attributes = {}) {
+  public static createSVG(
+    type: string,
+    cssClass: string | string[] | null = null,
+    attributes: Record<string, any> = {},
+  ): SVGElement {
     const el = document.createElementNS("http://www.w3.org/2000/svg", type);
 
     if (cssClass !== null) {
       if (typeof cssClass === "string") {
         el.classList.add(cssClass);
-      } else {  // multiple classes
+      } else {
+        // multiple classes
         el.classList.add(...cssClass);
       }
     }
-    setAttributes(el, attributes);
+    Utils.setAttributes(el, attributes);
 
     return el;
   }
 
-  public static setAttributes(element, params) {
+  public static setAttributes(
+    element: Element,
+    params: Record<string, any>,
+  ): void {
     for (const [attribute, value] of Object.entries(params)) {
       element.setAttribute(attribute, value);
     }
   }
 
-  public static toPercentage(value) {
+  public static toPercentage(value: number): string {
     return `${value * 100}%`;
   }
 
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/
-//  Global_Objects/Array/Reduce#sum_of_values_in_an_object_array
-  public static sum(array) {
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/
+  //  Global_Objects/Array/Reduce#sum_of_values_in_an_object_array
+  public static sum(array: number[]): number {
     return array.reduce((previous, current) => previous + current, 0);
   }
 
   /** Return arithmetic mean of values. */
-  public static mean(array) {
+  public static mean(array: number[]): number {
     return array.reduce((a, b) => a + b, 0) / array.length;
   }
 
-  public static clamp(value, min, max) {
+  public static clamp(value: number, min: number, max: number) {
     return Math.min(Math.max(value, min), max);
   }
 
@@ -129,7 +151,7 @@ export class Utils {
    * @param iterable
    * @returns {Generator<unknown[], void, *>}
    */
-  public static* pairwise(iterable) {
+  public static *pairwise<T>(iterable: Iterable<T>): Generator<[T, T]> {
     const iterator = iterable[Symbol.iterator]();
     let current = iterator.next();
     let next = iterator.next();
@@ -145,13 +167,10 @@ export class Utils {
    * arrays.
    *
    * Source: https://stackoverflow.com/a/44012184
-   *
-   * @param head
-   * @param tail
-   * @returns {Generator<*[], void, *>}
    */
-  public static* cartesian(head, ...tail) {
-    const remainder = tail.length > 0 ? cartesian(...tail) : [[]];
+  public static *cartesian(head: any[], ...tail: any[][]): Generator<any[]> {
+    const remainder =
+      tail.length > 0 ? Utils.cartesian(tail[0], ...tail.slice(1)) : [[]];
     for (let r of remainder) for (let h of head) yield [h, ...r];
   }
 
@@ -164,38 +183,43 @@ export class Utils {
    * @param {number} width
    * @returns {string}
    */
-  public static createStripes(colorHex1, colorHex2, opacity, width = 0.3) {
-    const opacityHex = (Math.round(opacity * 255)).toString(16);
+  public static createStripes(
+    colorHex1: string,
+    colorHex2: string,
+    opacity: number,
+    width: number = 0.3,
+  ): string {
+    const opacityHex = Math.round(opacity * 255).toString(16);
     const rgba1 = colorHex1 + opacityHex;
     const rgba2 = colorHex2 + opacityHex;
 
-    return `repeating-linear-gradient(`
-      + `-45deg, ${rgba1}, ${rgba1} ${width}em,`
-      + ` ${rgba2} ${width}em, ${rgba2} ${2 * width}em`
-      + `)`;
+    return (
+      `repeating-linear-gradient(` +
+      `-45deg, ${rgba1}, ${rgba1} ${width}em,` +
+      ` ${rgba2} ${width}em, ${rgba2} ${2 * width}em` +
+      `)`
+    );
   }
 
-
-  public static cumsum(values) {
+  public static cumsum(values: number[]): number[] {
     let sum = 0;
-    return values.map(value => sum += value);
+    return values.map((value) => (sum += value));
   }
 
-  public static readAsText(file) {
+  public static readAsText(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
+      reader.onload = () => resolve(reader.result as string);
       reader.onerror = reject;
       reader.readAsText(file);
     });
   }
 
-  public static getFileExtension(file) {
-    return file.name.split(".").pop();
+  public static getFileExtension(file: File): string {
+    return file.name.split(".").pop()!;
   }
 
-
-  public static* range(start, end, step = 1) {
+  public static *range(start: number, end: number, step = 1): Generator<number> {
     for (let i = start; i < end; i += step) {
       yield i;
     }
