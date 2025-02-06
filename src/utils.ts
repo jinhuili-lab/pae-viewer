@@ -1,16 +1,4 @@
 export class Utils {
-  public static createRandomId(prefix: string = ""): string {
-    if (prefix) {
-      prefix += "-";
-    }
-
-    return prefix + Math.random().toString(36).slice(2);
-  }
-
-  public static positiveModulo(x: number, n: number): number {
-    return ((x % n) + n) % n;
-  }
-
   public static splitLines(text: string): string[] {
     return text.split(/\r?\n/);
   }
@@ -58,40 +46,6 @@ export class Utils {
 
     return rows.map(
       (row) => new Map(row.map((value, i) => [headers[i], value])),
-    );
-  }
-
-  public static async fetchDSV(
-    url: string,
-    columns: string[] | null = null,
-    sep: string = "\t",
-  ): Promise<Map<string, string>[]> {
-    return fetch(url)
-      .then((response) => response.text())
-      .then((text) => Utils.readDSV(text, columns, sep));
-  }
-
-  /**
-   * Partition an iterable based on a condition.
-   *
-   * @param iter iterable
-   * @param doesConditionHold callable taking single argument and
-   *                          outputting boolean
-   * @returns {*} array of two arrays, the first one containing the
-   *              elements for which the condition holds, the second one
-   *              containing the rest
-   */
-  // based on https://codereview.stackexchange.com/a/162879
-  public static partitionOn<T>(
-    iter: T[],
-    doesConditionHold: (value: T) => boolean,
-  ): [T[], T[]] {
-    return iter.reduce(
-      (result, element) => {
-        result[doesConditionHold(element) ? 0 : 1].push(element);
-        return result;
-      },
-      [[] as T[], [] as T[]],
     );
   }
 
@@ -174,49 +128,9 @@ export class Utils {
     for (let r of remainder) for (let h of head) yield [h, ...r];
   }
 
-  /**
-   * Creates bicolored, striped CSS gradient.
-   *
-   * @param {string} colorHex1
-   * @param {string}  colorHex2
-   * @param {number} opacity
-   * @param {number} width
-   * @returns {string}
-   */
-  public static createStripes(
-    colorHex1: string,
-    colorHex2: string,
-    opacity: number,
-    width: number = 0.3,
-  ): string {
-    const opacityHex = Math.round(opacity * 255).toString(16);
-    const rgba1 = colorHex1 + opacityHex;
-    const rgba2 = colorHex2 + opacityHex;
-
-    return (
-      `repeating-linear-gradient(` +
-      `-45deg, ${rgba1}, ${rgba1} ${width}em,` +
-      ` ${rgba2} ${width}em, ${rgba2} ${2 * width}em` +
-      `)`
-    );
-  }
-
   public static cumsum(values: number[]): number[] {
     let sum = 0;
     return values.map((value) => (sum += value));
-  }
-
-  public static readAsText(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsText(file);
-    });
-  }
-
-  public static getFileExtension(file: File): string {
-    return file.name.split(".").pop()!;
   }
 
   public static *range(start: number, end: number, step = 1): Generator<number> {
