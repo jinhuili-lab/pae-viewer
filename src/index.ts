@@ -26,40 +26,40 @@ export interface RelativeIndex<E extends Entity = Entity> {
 export class PaeViewer<
   R extends Residue = Residue,
   E extends Entity = Entity,
-  C extends Crosslink = Crosslink
+  C extends Crosslink = Crosslink,
 > {
-  private _root;
-  private _template;
-  private _element;
+  private _root: any;
+  private _template: any;
+  private _element: any;
 
-  private _graph;
-  private _graphDefs;
-  private _stripePattern;
-  private _graphArea;
-  private _paeMatrix;
-  private _axesGroup;
-  private _unitTicksGroup;
-  private _sequenceTicksGroup;
-  private _sequenceTickLabelsGroup;
-  private _unitTickLabelsGroup;
-  private _dividerGroup;
-  private _interactiveGroup;
-  private _selectionGroup;
-  private _crosslinkGroup;
-  private _regionGroup;
-  private _paeScale;
-  private _paeScaleTicks;
-  private _statusCursor;
-  private _statusSelection;
-  private _regionToggleCheckBox;
-  private _downloadMatrix;
-  private _downloadSvg;
+  private _graph: any;
+  private _graphDefs: any;
+  private _stripePattern: any;
+  private _graphArea: any;
+  private _paeMatrix: any;
+  private _axesGroup: any;
+  private _unitTicksGroup: any;
+  private _sequenceTicksGroup: any;
+  private _sequenceTickLabelsGroup: any;
+  private _unitTickLabelsGroup: any;
+  private _dividerGroup: any;
+  private _interactiveGroup: any;
+  private _selectionGroup: any;
+  private _crosslinkGroup: any;
+  private _regionGroup: any;
+  private _paeScale: any;
+  private _paeScaleTicks: any;
+  private _statusCursor: any;
+  private _statusSelection: any;
+  private _regionToggleCheckBox: any;
+  private _downloadMatrix: any;
+  private _downloadSvg: any;
 
-  private _viewBox;
-  private _colorMapping = null;
-  private _colorRange = subunitColors;
+  private _viewBox: any;
+  private _colorMapping: any = null;
+  private _colorRange: any = subunitColors;
 
-  private _paePalette = (chroma as any)
+  private _paePalette: any = (chroma as any)
     .cubehelix()
     .start(120)
     .rotations(0)
@@ -68,17 +68,17 @@ export class PaeViewer<
     .lightness([0.2, 0.95]);
 
   private _dim;
-  private _crosslinks;
-  private _crosslinkMarkers;
-  private _complex;
-  private _selection;
-  private _selectedRegion = null;
-  private _isCursorOnGraph = false;
-  private _isShiftKeyDown = false;
+  private _crosslinks: any;
+  private _crosslinkMarkers: any;
+  private _complex: any;
+  private _selection: any;
+  private _selectedRegion: any = null;
+  private _isCursorOnGraph: any = false;
+  private _isShiftKeyDown: any = false;
 
   private _style = {
     general: {
-      fontFamily: "Arial, Helvetica, sans-serif"
+      fontFamily: "Arial, Helvetica, sans-serif",
     },
     defaults: {
       chartColor: "black",
@@ -87,21 +87,21 @@ export class PaeViewer<
       selectionOutlineColor: "white",
       markerOutlineColor: "white",
       markerOutlineThickness: "0.2%",
-      markerSize: "1%"
+      markerSize: "1%",
     },
     elements: {
       axes: {
         color: "$chartColor",
-        thickness: "$chartLineThickness"
+        thickness: "$chartLineThickness",
       },
       boxes: {
         roundness: "1%",
         color: "white",
-        opacity: 0.8
+        opacity: 0.8,
       },
       dividers: {
         color: "$chartColor",
-        thickness: "0.4%"
+        thickness: "0.4%",
       },
       ticks: {
         unitInterval: 100, // in sequence coordinates
@@ -110,42 +110,42 @@ export class PaeViewer<
         thickness: "$chartLineThickness",
         labelGap: 0.01,
         units: {
-          length: 0.02
+          length: 0.02,
         },
         subunits: {
-          length: 0.08
-        }
+          length: 0.08,
+        },
       },
       subunitLabels: {
         gap: 0.16,
         fontWeight: "bold",
         fontStyle: "italic",
-        color: "white"
+        color: "white",
       },
       regions: {
         opacity: 0.7,
-        fontSize: "$fontSize"
+        fontSize: "$fontSize",
       },
       selection: {
         lines: {
           color: "$selectionOutlineColor",
           thickness: "0.5%",
-          dashLength: "0.5%"
+          dashLength: "0.5%",
         },
         markers: {
           outlineColor: "$markerOutlineColor",
           outlineThickness: "$markerOutlineThickness",
-          size: "$markerSize"
+          size: "$markerSize",
         },
         rect: {
           color: "$selectionOutlineColor",
-          opacity: "0.5"
+          opacity: "0.5",
         },
         colors: {
           x: "cyan",
           y: "orange",
-          overlap: "magenta"
-        }
+          overlap: "magenta",
+        },
       },
       crosslinks: {
         outlineColor: "$markerOutlineColor",
@@ -154,19 +154,18 @@ export class PaeViewer<
         size: "$markerSize",
         restraintColors: {
           satisfied: "blue",
-          violated: "red"
-        }
-      }
-    }
+          violated: "red",
+        },
+      },
+    },
   };
 
-
   constructor(
-    root,
-    template,
+    root: any,
+    template: any,
     style = {},
     colorRange = null,
-    paePalette = null
+    paePalette = null,
   ) {
     this._root = root;
     this._template = template;
@@ -184,14 +183,14 @@ export class PaeViewer<
     this._sequenceTicksGroup =
       this._axesGroup.querySelector(".pv-sequence-ticks");
     this._sequenceTickLabelsGroup = this._axesGroup.querySelector(
-      ".pv-sequence-tick-labels"
+      ".pv-sequence-tick-labels",
     );
     this._unitTickLabelsGroup = this._axesGroup.querySelector(
-      ".pv-unit-tick-labels"
+      ".pv-unit-tick-labels",
     );
     this._dividerGroup = this._graphArea.querySelector(".pv-dividers");
     this._interactiveGroup = this._graphArea.querySelector(
-      ".pv-interactive-layer"
+      ".pv-interactive-layer",
     );
     this._selectionGroup = this._graphArea.querySelector(".pv-selections");
     this._regionGroup = this._graphArea.querySelector(".pv-regions");
@@ -204,7 +203,7 @@ export class PaeViewer<
     this._statusSelection = this._element.querySelector(".pv-status-selection");
 
     this._regionToggleCheckBox = this._element.querySelector(
-      ".pv-region-toggle input"
+      ".pv-region-toggle input",
     );
 
     this._downloadMatrix = this._element.querySelector(".pv-download-matrix");
@@ -225,7 +224,7 @@ export class PaeViewer<
     yLabel.setAttribute(
       "transform",
       `rotate(-90 ${-0.35 * this._viewBox.width}` +
-      ` ${0.5 * this._viewBox.height})`
+        ` ${0.5 * this._viewBox.height})`,
     );
 
     if (colorRange !== null) {
@@ -242,7 +241,7 @@ export class PaeViewer<
     for (const line of this._axesGroup.querySelectorAll("line")) {
       Utils.setAttributes(line, {
         stroke: this._style.elements.axes.color,
-        "stroke-width": this._style.elements.axes.thickness
+        "stroke-width": this._style.elements.axes.thickness,
       });
     }
 
@@ -256,7 +255,7 @@ export class PaeViewer<
     this._crosslinkMarkers = [];
   }
 
-  private _drawPaeColorScale(maxPae) {
+  private _drawPaeColorScale(maxPae: any) {
     const colors = [];
     const numSteps = 10;
 
@@ -265,7 +264,7 @@ export class PaeViewer<
     }
 
     const gradient = `linear-gradient(to right, ${colors.join(", ")})`;
-    const paeScale = document.querySelector(".pv-color-scale");
+    const paeScale: any = document.querySelector(".pv-color-scale");
     paeScale.style.background = gradient;
 
     const maxTick = document.createElement("span");
@@ -288,24 +287,20 @@ export class PaeViewer<
     }
   }
 
-  private _isPrimitive = (x) => {
+  private _isPrimitive = (x: any) => {
     return (
       typeof x === "string" || typeof x === "boolean" || typeof x === "number"
     );
   };
 
-  private _updateStyle(style) {
-    const updateObject = (base, update, keys = []) => {
+  private _updateStyle(style: any) {
+    const updateObject = (base: any, update: any, keys: any = []) => {
       const [baseKeys, updateKeys] = [base, update].map(
-        (obj) => new Set(Object.entries(obj).map(([key, _)
-    =>
-      key;
-    ))
-    )
-      ;
+        (obj) => new Set(Object.entries(obj).map(([key, _]) => key)),
+      );
 
       const unrecognizedKeys = [
-        ...new Set([...updateKeys].filter((key) => !baseKeys.has(key)))
+        ...new Set([...updateKeys].filter((key) => !baseKeys.has(key))),
       ];
 
       if (unrecognizedKeys.length > 0) {
@@ -318,7 +313,7 @@ export class PaeViewer<
       }
 
       const sharedKeys = new Set(
-        [...baseKeys].filter((key) => updateKeys.has(key))
+        [...baseKeys].filter((key) => updateKeys.has(key)),
       );
 
       for (const key of sharedKeys) {
@@ -345,7 +340,7 @@ export class PaeViewer<
   }
 
   private _insertStyleDefaults() {
-    const replacePlaceholders = (style, keys = []) => {
+    const replacePlaceholders = (style: any, keys: any = []) => {
       for (const [key, value] of Object.entries(style)) {
         const newKeys = [...keys, key];
 
@@ -364,7 +359,8 @@ export class PaeViewer<
             );
           }
 
-          style[key] = this._style.defaults[defaultsKey];
+          // @ts-ignore
+          style[key] = this._style.defaults[defaultsKey]! as any;
         } else {
           replacePlaceholders(value, newKeys);
         }
@@ -382,7 +378,7 @@ export class PaeViewer<
       startMarkers: [],
       lines: [],
       rangeLines: [],
-      rangeMarkers: []
+      rangeMarkers: [],
     };
   }
 
@@ -390,22 +386,22 @@ export class PaeViewer<
     return this._element;
   }
 
-  fetch(resource, options) {
+  fetch(resource: any, options: any) {
     fetch(resource, options)
       .then((response) => response.json())
       .then(this.load.bind(this));
   }
 
-  private _relative(coord) {
+  private _relative(coord: any) {
     return coord / this._dim;
   }
 
-  load(complex, colorMapping = null) {
+  load(complex: any, colorMapping = null) {
     const directory = `crosslinks/${complex.handle}/`;
 
     if (Object.hasOwn(complex, "pae") && Object.hasOwn(complex, "maxPae")) {
       this.createPaeImage(complex.pae, complex.maxPae).then((url) =>
-        this._setPaeImage(url)
+        this._setPaeImage(url),
       );
     } else if (Object.hasOwn(complex, "paeImageUrl")) {
       this._setPaeImage(complex.paeImageUrl);
@@ -415,7 +411,7 @@ export class PaeViewer<
 
     this._drawPaeColorScale(complex.maxPae ?? 31.75);
 
-    const sequenceLengths = complex.members.map((member) => member.length);
+    const sequenceLengths = complex.members.map((member: any) => member.length);
     this._dim = Utils.sum(sequenceLengths);
     this._complex = complex;
 
@@ -449,23 +445,23 @@ export class PaeViewer<
         () => {
           try {
             this.addCrosslinks(
-              Utils.readDSV(reader.result, null, ","),
-              complex.members
+              Utils.readDSV(reader.result as string, null, ","),
+              complex.members,
             );
           } catch (error) {
             console.error(error);
             alert("Couldn't load crosslinks from file!");
           }
         },
-        false
+        false,
       );
       reader.addEventListener(
         "error",
-        () => {
+        (error) => {
           console.error(error);
           alert("Couldn't load crosslinks from file!");
         },
-        false
+        false,
       );
 
       reader.readAsText(complex.crosslinksUrl);
@@ -475,7 +471,7 @@ export class PaeViewer<
         .then((crosslinkTable) => {
           this.addCrosslinks(
             Utils.readDSV(crosslinkTable, null, ","),
-            complex.members
+            complex.members,
           );
         });
     }
@@ -490,12 +486,12 @@ export class PaeViewer<
         this._complex.structureFile.name ?? this._complex.structureFile;
       return name.split("/").pop().slice(0, name.lastIndexOf("."));
     } else {
-      return this._complex.members.map((member) => member.title).join("-");
+      return this._complex.members.map((member: any) => member.title).join("-");
     }
   }
 
   private _setupSvgDownloadListener() {
-    this._downloadSvg.addEventListener("click", (_) => {
+    this._downloadSvg.addEventListener("click", (_: any) => {
       const svg = this._graph.cloneNode(true);
 
       svg.querySelector(".pv-selections").remove();
@@ -504,7 +500,7 @@ export class PaeViewer<
       // workaround for clients not supporting 'dominant-baseline',
       // e.g. Office applications (Word, PowerPoint)
       for (const text of svg.querySelectorAll(
-        "text[dominant-baseline=central]"
+        "text[dominant-baseline=central]",
       )) {
         const relativeY = parseFloat(text.getAttribute("y")) / 100;
         text.removeAttribute("dominant-baseline");
@@ -524,7 +520,7 @@ export class PaeViewer<
       const container = Utils.createSVG("g");
       container.setAttribute(
         "transform",
-        `translate(${-bbox.x + pad.left}, ${-bbox.y + pad.top})`
+        `translate(${-bbox.x + pad.left}, ${-bbox.y + pad.top})`,
       );
 
       container.appendChild(svg);
@@ -545,16 +541,16 @@ export class PaeViewer<
 
             saveAs(
               new Blob([outerSvg.outerHTML], {
-                type: "image/svg+xml;charset=utf-8"
+                type: "image/svg+xml;charset=utf-8",
               }),
-              this._getDownloadName() + ".svg"
+              this._getDownloadName() + ".svg",
             );
           };
         });
     });
   }
 
-  private _setPaeImage(url) {
+  private _setPaeImage(url: any) {
     this._paeMatrix.setAttribute("href", url);
     this._downloadMatrix.classList.remove("hidden");
     this._downloadMatrix.setAttribute("href", url);
@@ -562,7 +558,7 @@ export class PaeViewer<
     this._downloadMatrix.setAttribute("download", this._getImageName(url));
   }
 
-  private _getImageName(url) {
+  private _getImageName(url: any) {
     if (url.startsWith("blob:")) {
       return this._getDownloadName() + "_pae.png";
     } else {
@@ -570,7 +566,7 @@ export class PaeViewer<
     }
   }
 
-  createPaeImage(pae, paeMax) {
+  createPaeImage(pae: any, paeMax: any) {
     const dim = pae.length;
     const raw = new Uint8ClampedArray(dim * dim * 4);
 
@@ -594,14 +590,18 @@ export class PaeViewer<
         canvas.width = bitmap.width;
         canvas.height = bitmap.height;
         const ctx = canvas.getContext("bitmaprenderer");
-        ctx.transferFromImageBitmap(bitmap);
+        ctx!.transferFromImageBitmap(bitmap);
 
         return new Promise((resolve) => canvas.toBlob(resolve));
       })
-      .then(URL.createObjectURL);
+      .then(URL.createObjectURL as any);
   }
 
-  private _initColors(subunits, colorMapping = null, colorRange = null) {
+  private _initColors(
+    subunits: any,
+    colorMapping: any = null,
+    colorRange: any = null,
+  ) {
     if (colorMapping !== null) {
       for (const subunit of subunits.entries()) {
         subunit.color = colorMapping[subunit.uniprot];
@@ -619,7 +619,7 @@ export class PaeViewer<
     }
   }
 
-  private _addDividers(sequenceLengths) {
+  private _addDividers(sequenceLengths: any) {
     let offset = 0;
 
     for (const length of sequenceLengths.slice(0, -1)) {
@@ -634,8 +634,8 @@ export class PaeViewer<
           "stroke-width": this._style.elements.dividers.thickness,
           [coord + 1]: extent,
           [coord + 2]: extent,
-          [otherCoord + 1]: "0",
-          [otherCoord + 2]: "100%"
+          [otherCoord! + 1]: "0",
+          [otherCoord! + 2]: "100%",
         });
         this._dividerGroup.appendChild(line);
       }
@@ -644,14 +644,16 @@ export class PaeViewer<
     }
   }
 
-  private _addRegions(subunits) {
-    const lengths = subunits.map((subunit) => this._relative(subunit.length));
+  private _addRegions(subunits: any) {
+    const lengths = subunits.map((subunit: any) =>
+      this._relative(subunit.length),
+    );
     const offsets = [0, ...Utils.cumsum(lengths.slice(0, -1))];
     const indices = [...Array(subunits.length).keys()];
-    const names = subunits.map((subunit) => subunit.title);
+    const names = subunits.map((subunit: any) => subunit.title);
 
     // create stripe patterns for individual regions
-    const getPatternId = (i, j) =>
+    const getPatternId = (i: any, j: any) =>
       `stripes-${[i, j]
         .sort()
         .map((x) => names[x])
@@ -668,17 +670,17 @@ export class PaeViewer<
     }
 
     const regionSelections = new Map();
-    const createRegionSelection = (index) => ({
+    const createRegionSelection = (index: any) => ({
       range: [
         [subunits[index].uniprot, 1],
-        [subunits[index].uniprot, subunits[index].length]
+        [subunits[index].uniprot, subunits[index].length],
       ],
-      color: subunits[index].color
+      color: subunits[index].color,
     });
 
     for (const [x, y] of Utils.cartesian(indices, indices)) {
       const region = Utils.createSVG("g", "pv-region", {
-        opacity: this._style.elements.regions.opacity
+        opacity: this._style.elements.regions.opacity,
       });
       const id = `${names[x]}-${names[y]}`;
       region.dataset.id = id;
@@ -689,22 +691,22 @@ export class PaeViewer<
         x: Utils.toPercentage(offsets[x]),
         y: Utils.toPercentage(offsets[y]),
         width: Utils.toPercentage(lengths[x]),
-        height: Utils.toPercentage(lengths[y])
+        height: Utils.toPercentage(lengths[y]),
       });
 
       region.appendChild(background);
 
       const labelX = offsets[x] + lengths[x] / 2;
       const labelY = offsets[y] + lengths[y] / 2;
-      const fontSize = this._style.elements.regions.fontSize;
+      const fontSize = this._style.elements.regions.fontSize as any as number;
 
       const label = Utils.createSVG("text", null, {
         x: Utils.toPercentage(labelX),
         y: Utils.toPercentage(labelY),
         "text-anchor": "middle",
         "dominant-baseline": "middle",
-        "font-size": fontSize * this._viewBox.height,
-        "font-family": this._style.general.fontFamily
+        "font-size": (fontSize as any as number) * this._viewBox.height,
+        "font-family": this._style.general.fontFamily,
       });
 
       if (x === y) {
@@ -712,8 +714,11 @@ export class PaeViewer<
         label.textContent = names[x];
         region.appendChild(label);
         region.insertBefore(
-          this._createBackgroundBox(label.getBBox(), 0.2 * fontSize),
-          label
+          this._createBackgroundBox(
+            (label as any).getBBox(),
+            0.2 * (fontSize as any as number),
+          ),
+          label,
         );
 
         const selection = createRegionSelection(x);
@@ -721,13 +726,16 @@ export class PaeViewer<
         let meanPae = null;
 
         if (this._complex.pae) {
-          meanPae = this._calcMeanPae(...selection.range, ...selection.range);
+          meanPae = this._calcMeanPae(
+            ...(selection.range as [any, any]),
+            ...(selection.range as [any, any]),
+          );
         }
 
         regionSelections.set(id, {
           type: "single",
           selection: createRegionSelection(x),
-          meanPae: meanPae
+          meanPae: meanPae,
         });
       } else {
         background.setAttribute("fill", `url(#${getPatternId(x, y)})`);
@@ -736,8 +744,11 @@ export class PaeViewer<
           label.textContent = `${names[x]} / ${names[y]}`;
           region.appendChild(label);
           region.insertBefore(
-            this._createBackgroundBox(label.getBBox(), 0.2 * fontSize),
-            label
+            this._createBackgroundBox(
+              (label as any).getBBox(),
+              0.2 * (fontSize as any as number),
+            ),
+            label,
           );
         } else {
           label.textContent = "/";
@@ -754,7 +765,7 @@ export class PaeViewer<
               "text-anchor": "middle",
               "dominant-baseline": "middle",
               "font-size": fontSize * this._viewBox.height,
-              "font-family": this._style.general.fontFamily
+              "font-family": this._style.general.fontFamily,
             });
           }
 
@@ -762,19 +773,19 @@ export class PaeViewer<
           lower.setAttribute("y", Utils.toPercentage(labelY + fontSize));
 
           region.append(upper, label, lower);
-          const upperBox = upper.getBBox();
-          const lowerBox = lower.getBBox();
+          const upperBox = (upper as any).getBBox();
+          const lowerBox = (lower as any).getBBox();
 
           const combinedBox = {
             x: Math.min(upperBox.x, upperBox.x),
             y: upperBox.y,
             width: Math.max(upperBox.width, upperBox.width),
-            height: lowerBox.y + lowerBox.height - upperBox.y
+            height: lowerBox.y + lowerBox.height - upperBox.y,
           };
 
           region.insertBefore(
             this._createBackgroundBox(combinedBox, 0.2 * fontSize),
-            upper
+            upper,
           );
         }
 
@@ -784,16 +795,19 @@ export class PaeViewer<
         let meanPae = null;
 
         if (this._complex.pae) {
-          meanPae = this._calcMeanPae(...selectionX.range, ...selectionY.range);
+          meanPae = this._calcMeanPae(
+            ...(selectionX.range as [any, any]),
+            ...(selectionY.range as [any, any]),
+          );
         }
 
         regionSelections.set(id, {
           type: "pair",
           selection: {
             x: selectionX,
-            y: selectionY
+            y: selectionY,
           },
-          meanPae: meanPae
+          meanPae: meanPae,
         });
       }
     }
@@ -803,7 +817,7 @@ export class PaeViewer<
     const toggleRegions = () =>
       this.displayRegions(
         (this._isShiftKeyDown && this._isCursorOnGraph) ||
-        this._regionToggleCheckBox.checked
+          this._regionToggleCheckBox.checked,
       );
 
     document.addEventListener("keydown", (event) => {
@@ -837,11 +851,11 @@ export class PaeViewer<
       toggleRegions();
     });
 
-    this._regionToggleCheckBox.addEventListener("change", (_) => {
+    this._regionToggleCheckBox.addEventListener("change", (_: any) => {
       toggleRegions();
     });
 
-    this._regionGroup.addEventListener("click", (event) => {
+    this._regionGroup.addEventListener("click", (event: any) => {
       const region = event.target.closest(".pv-region");
 
       if (region === null) {
@@ -854,7 +868,7 @@ export class PaeViewer<
       this._selectedRegion.classList.add("pv-region-selected");
 
       const regionSelection = regionSelections.get(
-        this._selectedRegion.dataset.id
+        this._selectedRegion.dataset.id,
       );
 
       this._updateRegionSelectionStatus(regionSelection);
@@ -864,18 +878,18 @@ export class PaeViewer<
           bubbles: true,
           detail: {
             complex: this._complex,
-            ...regionSelection
-          }
-        })
+            ...regionSelection,
+          },
+        }),
       );
     });
 
-    this._regionGroup.addEventListener("mousedown", (event) => {
+    this._regionGroup.addEventListener("mousedown", (event: any) => {
       event.stopPropagation();
     });
   }
 
-  private _updateCursorStatus(event) {
+  private _updateCursorStatus(event: any) {
     if (!this._isCursorOnGraph) {
       this._statusCursor.replaceChildren();
       return;
@@ -891,18 +905,18 @@ export class PaeViewer<
 
       residues = [
         [crosslink.get("Protein1"), parseInt(crosslink.get("SeqPos1"))],
-        [crosslink.get("Protein2"), parseInt(crosslink.get("SeqPos2"))]
+        [crosslink.get("Protein2"), parseInt(crosslink.get("SeqPos2"))],
       ];
     } else {
       residues = coords.map(this._getResidueFromRelative.bind(this));
     }
 
     this._statusCursor.replaceChildren(
-      this._getStatusAtCoords(residues[0], residues[1], isCrosslink)
+      this._getStatusAtCoords(residues[0], residues[1], isCrosslink),
     );
   }
 
-  private _getStatusAtCoords(coordX, coordY, isCrosslink) {
+  private _getStatusAtCoords(coordX: any, coordY: any, isCrosslink: any) {
     const fragment = new DocumentFragment();
 
     const [residueX, residueY] = this._getCoordStrings([coordX, coordY]);
@@ -941,24 +955,24 @@ export class PaeViewer<
     return fragment;
   }
 
-  private _getCoordStrings(residues) {
-    return residues.map(([uniprot, coord]) => {
+  private _getCoordStrings(residues: any) {
+    return residues.map(([uniprot, coord]: [any, any]) => {
       const member = this._complex.members.find(
-        (member) => member.uniprot === uniprot
+        (member: any) => member.uniprot === uniprot,
       );
 
       return {
         string: PaeViewer.residueToString(member, coord),
-        index: member.offset + coord - 1
+        index: member.offset + coord - 1,
       };
     });
   }
 
-  displayRegions(show) {
+  displayRegions(show: any) {
     this._regionGroup.setAttribute("visibility", show ? "visible" : "hidden");
   }
 
-  private _getResidueFromRelative(coord) {
+  private _getResidueFromRelative(coord: any) {
     coord = Math.ceil(coord * this._dim);
 
     if (coord === 0) coord++;
@@ -975,12 +989,12 @@ export class PaeViewer<
     return [uniprot, coord];
   }
 
-  getRelativeMousePosition(mouseEvent, clamped = true) {
+  getRelativeMousePosition(mouseEvent: any, clamped: any = true) {
     const rect = this._paeMatrix.getBoundingClientRect();
 
     const coords = [
       (mouseEvent.clientX - rect.left) / (rect.right - rect.left),
-      (mouseEvent.clientY - rect.top) / (rect.bottom - rect.top)
+      (mouseEvent.clientY - rect.top) / (rect.bottom - rect.top),
     ];
 
     if (clamped) {
@@ -990,7 +1004,7 @@ export class PaeViewer<
     }
   }
 
-  isCursorOnGraph(mouseEvent) {
+  isCursorOnGraph(mouseEvent: any) {
     const coords = this.getRelativeMousePosition(mouseEvent, false);
 
     for (const coord of coords) {
@@ -1028,9 +1042,9 @@ export class PaeViewer<
    * @param from
    * @param to
    */
-  private _updateSelectionLines(from, to) {
+  private _updateSelectionLines(from: any, to: any) {
     for (const [index, [axis, constantPoint]] of [
-      ...Utils.cartesian(["x", "y"], [from, to])
+      ...Utils.cartesian(["x", "y"], [from, to]),
     ].entries()) {
       const i = axis === "x" ? 0 : 1;
       const j = 1 - i;
@@ -1040,7 +1054,7 @@ export class PaeViewer<
       const line = this._selection.lines[index];
 
       const [outer, inner] = [to[i], from[i]].sort(
-        (a, b) => Math.abs(constant - b) - Math.abs(constant - a)
+        (a, b) => Math.abs(constant - b) - Math.abs(constant - a),
       );
 
       Utils.setAttributes(line, {
@@ -1048,16 +1062,16 @@ export class PaeViewer<
         [axis + 2]: Utils.toPercentage(
           outer < constant
             ? Math.max(inner, constant)
-            : Math.min(inner, constant)
+            : Math.min(inner, constant),
         ),
         [constantCoord + 1]: Utils.toPercentage(constant),
-        [constantCoord + 2]: Utils.toPercentage(constant)
+        [constantCoord + 2]: Utils.toPercentage(constant),
       });
     }
   }
 
-  private _updatedSelectionMarkers(from, to) {
-    const inUpperHalf = (x, y) => y >= x;
+  private _updatedSelectionMarkers(from: any, to: any) {
+    const inUpperHalf = (x: any, y: any) => y >= x;
 
     // start point is in upper left triangle
     const startInUpperHalf = inUpperHalf(from[0], from[1]);
@@ -1068,7 +1082,7 @@ export class PaeViewer<
     const otherPointsInUpperHalf = [
       [to[0], to[1]],
       [to[0], from[1]],
-      [from[0], to[1]]
+      [from[0], to[1]],
     ].map(([x, y]) => inUpperHalf(x, y));
 
     const overlap =
@@ -1091,7 +1105,7 @@ export class PaeViewer<
       ...(overlap
         ? gradients.map((gradient) => `url("#${gradient}")`)
         : [color1, color2]),
-      color2
+      color2,
     ];
 
     const markerCoords = [from[0], from[1], to[0], to[1]].sort();
@@ -1101,14 +1115,14 @@ export class PaeViewer<
       Utils.setAttributes(marker, {
         cx: Utils.toPercentage(coord),
         cy: Utils.toPercentage(coord),
-        fill: markerColors[i]
+        fill: markerColors[i],
       });
     }
 
     const lineColors = [color1, style.colors.overlap, color2];
 
     for (const [i, [start, end]] of [
-      ...Utils.pairwise(markerCoords)
+      ...Utils.pairwise(markerCoords),
     ].entries()) {
       const line = this._selection.rangeLines[i];
 
@@ -1123,7 +1137,7 @@ export class PaeViewer<
         y1: Utils.toPercentage(start),
         x2: Utils.toPercentage(end),
         y2: Utils.toPercentage(end),
-        stroke: lineColors[i]
+        stroke: lineColors[i],
       });
     }
 
@@ -1133,11 +1147,11 @@ export class PaeViewer<
     const [rangeX, rangeY] = startInUpperHalf ? ranges : ranges.reverse();
 
     const [fromResidueX, fromResidueY] = from.map(
-      this._getResidueFromRelative.bind(this)
+      this._getResidueFromRelative.bind(this),
     );
 
     const [toResidueX, toResidueY] = to.map(
-      this._getResidueFromRelative.bind(this)
+      this._getResidueFromRelative.bind(this),
     );
 
     return {
@@ -1145,20 +1159,20 @@ export class PaeViewer<
       y: { range: rangeY, color: style.colors.y },
       overlap: overlap
         ? {
-          range: coords.slice(1, 3),
-          color: style.colors.overlap
-        }
+            range: coords.slice(1, 3),
+            color: style.colors.overlap,
+          }
         : null,
       from: { x: fromResidueX, y: fromResidueY },
-      to: { x: toResidueX, y: toResidueY }
+      to: { x: toResidueX, y: toResidueY },
     };
   }
 
   setupSelectionListeners() {
-    let lastMouseDownEvent = null;
+    let lastMouseDownEvent: any = null;
     let selectingRange = false;
 
-    this._interactiveGroup.addEventListener("mousedown", (event) => {
+    this._interactiveGroup.addEventListener("mousedown", (event: any) => {
       this.deselectAll(false);
 
       event.stopPropagation();
@@ -1167,7 +1181,7 @@ export class PaeViewer<
       lastMouseDownEvent = event;
     });
 
-    document.addEventListener("mouseup", (event) => {
+    document.addEventListener("mouseup", (event: any) => {
       if (lastMouseDownEvent === null) return;
 
       event.stopPropagation();
@@ -1195,7 +1209,7 @@ export class PaeViewer<
       } else {
         this.selectRangeStart(
           this.getRelativeMousePosition(event),
-          this.getRelativeMousePosition(lastMouseDownEvent)
+          this.getRelativeMousePosition(lastMouseDownEvent),
         );
 
         selectingRange = true;
@@ -1203,7 +1217,7 @@ export class PaeViewer<
     });
   }
 
-  selectPoint(point) {
+  selectPoint(point: any) {
     const [coordX, coordY] = point;
     const style = this._style.elements.selection;
 
@@ -1212,14 +1226,14 @@ export class PaeViewer<
       "stroke-width": style.lines.thickness,
       "stroke-dasharray": style.lines.dashLength,
       x2: Utils.toPercentage(coordX),
-      y2: Utils.toPercentage(coordY)
+      y2: Utils.toPercentage(coordY),
     });
 
     for (const coord of point) {
       const line = lineTemplate.cloneNode(false);
-      Utils.setAttributes(line, {
+      Utils.setAttributes(line as Element, {
         x1: Utils.toPercentage(coord),
-        y1: Utils.toPercentage(coord)
+        y1: Utils.toPercentage(coord),
       });
       this._selectionGroup.appendChild(line);
     }
@@ -1227,29 +1241,29 @@ export class PaeViewer<
     const markerTemplate = Utils.createSVG("circle", "pv-selection-marker", {
       stroke: style.markers.outlineColor,
       "stroke-width": style.markers.outlineThickness,
-      r: style.markers.size
+      r: style.markers.size,
     });
 
     for (const [color, cx, cy] of [
       ["white", coordX, coordY],
       [style.colors.x, coordX, coordX],
-      [style.colors.y, coordY, coordY]
+      [style.colors.y, coordY, coordY],
     ]) {
       const marker = markerTemplate.cloneNode(false);
-      Utils.setAttributes(marker, {
+      Utils.setAttributes(marker as Element, {
         cx: Utils.toPercentage(cx),
         cy: Utils.toPercentage(cy),
-        fill: color
+        fill: color,
       });
       this._selectionGroup.appendChild(marker);
     }
 
     const [selectionX, selectionY] = [coordX, coordY].map(
-      this._getResidueFromRelative.bind(this)
+      this._getResidueFromRelative.bind(this),
     );
 
     this._statusSelection.replaceChildren(
-      this._getStatusAtCoords(selectionX, selectionY, false)
+      this._getStatusAtCoords(selectionX, selectionY, false),
     );
 
     this._element.dispatchEvent(
@@ -1259,14 +1273,14 @@ export class PaeViewer<
           complex: this._complex,
           selection: {
             x: { residue: selectionX, color: style.colors.x },
-            y: { residue: selectionY, color: style.colors.y }
-          }
-        }
-      })
+            y: { residue: selectionY, color: style.colors.y },
+          },
+        },
+      }),
     );
   }
 
-  setRect(rect, x1, y1, x2, y2) {
+  setRect(rect: any, x1: any, y1: any, x2: any, y2: any) {
     const [rectX1, rectX2] = [x1, x2].sort();
     const [rectY1, rectY2] = [y1, y2].sort();
 
@@ -1274,20 +1288,20 @@ export class PaeViewer<
       x: Utils.toPercentage(rectX1),
       y: Utils.toPercentage(rectY1),
       width: Utils.toPercentage(rectX2 - rectX1),
-      height: Utils.toPercentage(rectY2 - rectY1)
+      height: Utils.toPercentage(rectY2 - rectY1),
     });
   }
 
-  selectRangeStart(from, to) {
+  selectRangeStart(from: any, to: any) {
     const style = this._style.elements.selection;
     this._selection.start = from;
 
     const rect = Utils.createSVG("rect", "pv-selection-rect", {
       fill: style.rect.color,
       opacity: style.rect.opacity,
-      stroke: "none"
+      stroke: "none",
     });
-    this.setRect(rect, ...from, ...to);
+    this.setRect(rect, ...from as [any, any], ...to as [any, any]);
     this._selection.rect = rect;
     this._selectionGroup.appendChild(rect);
     this._selection.lines = [];
@@ -1295,7 +1309,7 @@ export class PaeViewer<
     const lineTemplate = Utils.createSVG("line", "pv-selection-line", {
       stroke: style.lines.color,
       "stroke-width": style.lines.thickness,
-      "stroke-dasharray": style.lines.dashLength
+      "stroke-dasharray": style.lines.dashLength,
     });
 
     for (let i = 0; i < 4; i++) {
@@ -1310,7 +1324,7 @@ export class PaeViewer<
       fill: style.markers.outlineColor,
       stroke: style.markers.outlineColor,
       "stroke-width": style.markers.outlineThickness,
-      r: style.markers.size
+      r: style.markers.size,
     });
     this._selection.rangeMarkers = [];
 
@@ -1321,7 +1335,7 @@ export class PaeViewer<
     }
 
     const rangeLineTemplate = Utils.createSVG("line", "pv-range-line", {
-      "stroke-width": style.lines.thickness
+      "stroke-width": style.lines.thickness,
     });
     this._selection.rangeLines = [];
 
@@ -1334,9 +1348,9 @@ export class PaeViewer<
     const rangeSelection = this._updatedSelectionMarkers(from, to);
 
     const startMarker = markerTemplate.cloneNode(false);
-    Utils.setAttributes(startMarker, {
+    Utils.setAttributes(startMarker as Element, {
       cx: Utils.toPercentage(from[0]),
-      cy: Utils.toPercentage(from[1])
+      cy: Utils.toPercentage(from[1]),
     });
     this._selectionGroup.appendChild(startMarker);
 
@@ -1346,12 +1360,12 @@ export class PaeViewer<
     for (const [cx, cy] of [
       [to[0], to[1]],
       [from[0], to[1]],
-      [to[0], from[1]]
+      [to[0], from[1]],
     ]) {
       const marker = markerTemplate.cloneNode(false);
-      Utils.setAttributes(startMarker, {
+      Utils.setAttributes(startMarker as Element, {
         cx: Utils.toPercentage(cx),
-        cy: Utils.toPercentage(cy)
+        cy: Utils.toPercentage(cy),
       });
       this._selectionGroup.appendChild(marker);
       this._selection.rectMarkers.push(marker);
@@ -1360,7 +1374,7 @@ export class PaeViewer<
     this.updateRangeSelectionStatus(rangeSelection);
   }
 
-  updateRangeSelectionStatus(selection) {
+  updateRangeSelectionStatus(selection: any) {
     const residuesX = this._getCoordStrings(selection.x.range);
     const residuesY = this._getCoordStrings(selection.y.range);
 
@@ -1387,16 +1401,16 @@ export class PaeViewer<
     }
   }
 
-  private _updateRegionSelectionStatus(region) {
+  private _updateRegionSelectionStatus(region: any) {
     this._statusSelection.replaceChildren();
 
-    const createMarker = (selection) => {
+    const createMarker = (selection: any) => {
       const marker = document.createElement("span");
       marker.classList.add("pv-color-marker");
       marker.style.backgroundColor = selection.color;
 
       const member = this._complex.members.find(
-        (member) => member.uniprot === selection.range[0][0]
+        (member: any) => member.uniprot === selection.range[0][0],
       );
 
       marker.textContent = member.title;
@@ -1407,7 +1421,7 @@ export class PaeViewer<
       this._statusSelection.append("chain", createMarker(region.selection));
     } else {
       const [chainX, chainY] = [region.selection.x, region.selection.y].map(
-        createMarker
+        createMarker,
       );
 
       this._statusSelection.append("chains ", chainX, " / ", chainY);
@@ -1421,21 +1435,21 @@ export class PaeViewer<
     }
   }
 
-  selectRangeUpdate(to) {
+  selectRangeUpdate(to: any) {
     const from = this._selection.start;
 
-    this.setRect(this._selection.rect, ...from, ...to);
+    this.setRect(this._selection.rect, ...from as [any, any], ...to as [any, any]);
 
     // rectangle markers
     for (const [i, [cx, cy]] of [
       [to[0], to[1]],
       [from[0], to[1]],
-      [to[0], from[1]]
+      [to[0], from[1]],
     ].entries()) {
       const marker = this._selection.rectMarkers[i];
       Utils.setAttributes(marker, {
         cx: Utils.toPercentage(cx),
-        cy: Utils.toPercentage(cy)
+        cy: Utils.toPercentage(cy),
       });
     }
 
@@ -1447,7 +1461,7 @@ export class PaeViewer<
     return rangeSelection;
   }
 
-  selectRangeEnd(to) {
+  selectRangeEnd(to: any) {
     const selection = this.selectRangeUpdate(to);
 
     this._element.dispatchEvent(
@@ -1455,9 +1469,9 @@ export class PaeViewer<
         bubbles: true,
         detail: {
           complex: this._complex,
-          selection: selection
-        }
-      })
+          selection: selection,
+        },
+      }),
     );
 
     if (this._complex.pae) {
@@ -1466,7 +1480,7 @@ export class PaeViewer<
         selection.from.x,
         selection.to.x,
         selection.from.y,
-        selection.to.y
+        selection.to.y,
       );
 
       const paeDisplay = document.createElement("b");
@@ -1476,27 +1490,40 @@ export class PaeViewer<
     }
   }
 
-  private _calcMeanPae(residueX1, residueX2, residueY1, residueY2) {
-    const sortNumerically = (a, b) => a - b;
+  private _calcMeanPae(
+    residueX1: any,
+    residueX2: any,
+    residueY1: any,
+    residueY2: any,
+  ) {
+    const sortNumerically = (a: any, b: any) => a - b;
 
     const [x1, x2] = this._getCoordStrings([residueX1, residueX2])
-      .map((residue) => residue.index)
+      .map((residue: any) => residue.index)
       .sort(sortNumerically);
 
     const [y1, y2] = this._getCoordStrings([residueY1, residueY2])
-      .map((residue) => residue.index)
+      .map((residue: any) => residue.index)
       .sort(sortNumerically);
 
     // calculate mean of 2D slice of PAE matrix
     return Utils.mean(
       this._complex.pae
         .slice(y1, y2 + 1)
-        .map((row) => row.slice(x1, x2 + 1))
-        .flat()
+        .map((row: any) => row.slice(x1, x2 + 1))
+        .flat(),
     );
   }
 
-  private _addTick(rootTick, rootLabel, axis, value, offset, tickLength, text = null) {
+  private _addTick(
+    rootTick: any,
+    rootLabel: any,
+    axis: any,
+    value: any,
+    offset: any,
+    tickLength: any,
+    text: any = null,
+  ) {
     const otherAxis = axis === "x" ? "y" : "x";
     const anchor = axis === "x" ? "middle" : "end";
     const baseline = axis === "x" ? "auto" : "central";
@@ -1509,25 +1536,25 @@ export class PaeViewer<
       [axis + 1]: "0",
       [axis + 2]: Utils.toPercentage(-tickLength),
       [otherAxis + 1]: Utils.toPercentage(ratio),
-      [otherAxis + 2]: Utils.toPercentage(ratio)
+      [otherAxis + 2]: Utils.toPercentage(ratio),
     });
 
     const labelCoords = [
       ratio,
-      -(tickLength + this._style.elements.ticks.labelGap)
+      -(tickLength + this._style.elements.ticks.labelGap),
     ];
 
     rootTick.appendChild(tick);
     this._addTickLabel(
       rootLabel,
-      ...(axis === "x" ? labelCoords : labelCoords.reverse()),
+      ...(axis === "x" ? labelCoords : labelCoords.reverse()) as [any, any],
       text !== null ? text : value,
       anchor,
-      baseline
+      baseline,
     );
   }
 
-  private _addTicks(members) {
+  private _addTicks(members: any) {
     let offset = 0;
     let lastSubunit = null;
     const style = this._style.elements;
@@ -1540,7 +1567,7 @@ export class PaeViewer<
       "0",
       "end",
       "auto",
-      false
+      false,
     );
 
     // add tick marks for both axes
@@ -1559,7 +1586,7 @@ export class PaeViewer<
             axis,
             value,
             offset,
-            style.ticks.units.length
+            style.ticks.units.length,
           );
         }
 
@@ -1571,26 +1598,26 @@ export class PaeViewer<
           member.length,
           offset,
           style.ticks.subunits.length,
-          member.length + (i < members.length - 1 ? " / 0" : "")
+          member.length + (i < members.length - 1 ? " / 0" : ""),
         );
 
         const labelCoords = [
           this._relative(offset + member.length / 2),
-          -style.subunitLabels.gap
+          -style.subunitLabels.gap,
         ];
 
         this._addTickLabel(
           this._sequenceTickLabelsGroup,
-          ...(axis === "x" ? labelCoords : labelCoords.reverse()),
+          ...(axis === "x" ? labelCoords : labelCoords.reverse()) as [any, any],
           member.title,
-          ...(axis === "x" ? ["middle", "auto"] : ["end", "central"]),
+          ...(axis === "x" ? ["middle", "auto"] : ["end", "central"]) as [any, any],
           true,
           {
             "font-weight": style.subunitLabels.fontWeight,
             "font-style": style.subunitLabels.fontStyle,
-            fill: style.subunitLabels.color
+            fill: style.subunitLabels.color,
           },
-          { fill: members[i].color }
+          { fill: members[i].color },
         );
       }
 
@@ -1600,10 +1627,10 @@ export class PaeViewer<
   }
 
   private _createBackgroundBox(
-    box,
-    horizontalPadding = 0,
-    verticalPadding = 0,
-    params = {}
+    box: any,
+    horizontalPadding: any = 0,
+    verticalPadding: any = 0,
+    params: any = {},
   ) {
     horizontalPadding = horizontalPadding * this._viewBox.width;
     verticalPadding = verticalPadding * this._viewBox.height;
@@ -1615,27 +1642,27 @@ export class PaeViewer<
       x: Utils.toPercentage((box.x - horizontalPadding) / this._viewBox.width),
       y: Utils.toPercentage((box.y - verticalPadding) / this._viewBox.height),
       width: Utils.toPercentage(
-        (box.width + 2 * horizontalPadding) / this._viewBox.width
+        (box.width + 2 * horizontalPadding) / this._viewBox.width,
       ),
       height: Utils.toPercentage(
-        (box.height + 2 * verticalPadding) / this._viewBox.height
+        (box.height + 2 * verticalPadding) / this._viewBox.height,
       ),
-      ...params
+      ...params,
     });
   }
 
   private _addTickLabel(
-    root,
-    x,
-    y,
-    text,
-    anchor,
-    baseline,
+    root: any,
+    x: any,
+    y: any,
+    text: any,
+    anchor: any,
+    baseline: any,
     addBackground = true,
     params = {},
-    backgroundParams = {}
+    backgroundParams = {},
   ) {
-    const fontSize = this._style.elements.ticks.fontSize;
+    const fontSize = this._style.elements.ticks.fontSize as any as number;
 
     const label = Utils.createSVG("text", "pv-tick-label", {
       x: Utils.toPercentage(x),
@@ -1644,23 +1671,23 @@ export class PaeViewer<
       "dominant-baseline": baseline,
       "font-size": fontSize * this._viewBox.height,
       "font-family": this._style.general.fontFamily,
-      ...params
+      ...params,
     });
     label.textContent = text;
     root.appendChild(label);
 
     if (addBackground) {
       const background = this._createBackgroundBox(
-        label.getBBox(),
+        (label as any).getBBox(),
         0.1 * fontSize,
         0,
-        backgroundParams
+        backgroundParams,
       );
       root.insertBefore(background, label);
     }
   }
 
-  addCrosslinks(crosslinks, members) {
+  addCrosslinks(crosslinks: any, members: any) {
     this._crosslinks = crosslinks;
     let offset = 0;
 
@@ -1669,7 +1696,7 @@ export class PaeViewer<
       offset += member.length;
     }
 
-    members = new Map(members.map((member) => [member.uniprot, member]));
+    members = new Map(members.map((member: any) => [member.uniprot, member]));
     const style = this._style.elements.crosslinks;
 
     this._crosslinkMarkers = [];
@@ -1687,7 +1714,7 @@ export class PaeViewer<
         const uniprot = crosslink.get("Protein" + i);
         return this._relative(
           members.get(uniprot)["offset"] +
-          parseInt(crosslink.get("SeqPos" + i))
+            parseInt(crosslink.get("SeqPos" + i)),
         );
       });
 
@@ -1705,8 +1732,8 @@ export class PaeViewer<
             "data-crosslink-id": id,
             cx: Utils.toPercentage(coord1),
             cy: Utils.toPercentage(coord2),
-            fill: color
-          }
+            fill: color,
+          },
         );
 
         this._crosslinkGroup.appendChild(crosslinkMarker);
@@ -1717,11 +1744,11 @@ export class PaeViewer<
       this._crosslinkMarkers.push(markerPair);
     }
 
-    this._crosslinkGroup.addEventListener("mousedown", (event) => {
+    this._crosslinkGroup.addEventListener("mousedown", (event: any) => {
       event.stopPropagation();
     });
 
-    this._crosslinkGroup.addEventListener("click", (event) => {
+    this._crosslinkGroup.addEventListener("click", (event: any) => {
       if (!event.target.classList.contains("pv-crosslink-marker")) {
         return;
       }
@@ -1746,11 +1773,11 @@ export class PaeViewer<
 
       const [residue1, residue2] = [
         [crosslink.get("Protein1"), parseInt(crosslink.get("SeqPos1"))],
-        [crosslink.get("Protein2"), parseInt(crosslink.get("SeqPos2"))]
+        [crosslink.get("Protein2"), parseInt(crosslink.get("SeqPos2"))],
       ];
 
       this._statusSelection.replaceChildren(
-        this._getStatusAtCoords(residue1, residue2, true)
+        this._getStatusAtCoords(residue1, residue2, true),
       );
 
       this._element.dispatchEvent(
@@ -1761,14 +1788,14 @@ export class PaeViewer<
             selection: {
               id: event.target.dataset.crosslinkId,
               residue1: residue1,
-              residue2: residue2
-            }
-          }
-        })
+              residue2: residue2,
+            },
+          },
+        }),
       );
     });
 
-    this._crosslinkGroup.addEventListener("mouseover", (event) => {
+    this._crosslinkGroup.addEventListener("mouseover", (event: any) => {
       const id = event.target.dataset.crosslinkId;
 
       for (const marker of this._crosslinkMarkers[id]) {
@@ -1776,7 +1803,7 @@ export class PaeViewer<
       }
     });
 
-    this._crosslinkGroup.addEventListener("mouseout", (event) => {
+    this._crosslinkGroup.addEventListener("mouseout", (event: any) => {
       const id = event.target.dataset.crosslinkId;
 
       for (const marker of this._crosslinkMarkers[id]) {
@@ -1790,9 +1817,9 @@ export class PaeViewer<
       new CustomEvent("pv-reset-selection", {
         bubbles: true,
         detail: {
-          complex: this._complex
-        }
-      })
+          complex: this._complex,
+        },
+      }),
     );
   }
 
@@ -1810,14 +1837,14 @@ export class PaeViewer<
 
     this._resetSelection();
 
-    this._selectedRegion?.classList.remove("pv-region-selected");
+    this._selectedRegion?.classList!.remove("pv-region-selected");
     this._selectedRegion = null;
 
     this._selectionGroup.replaceChildren();
     this._statusSelection.replaceChildren();
   }
 
-  static residueToString(member, index) {
+  static residueToString(member: any, index: any) {
     const residue = member.sequence[index - 1];
 
     return `${residue.name} ${index} (${member.title})`;
@@ -2037,7 +2064,6 @@ interface PaeViewerStyle {
   };
 }
 
-
 // modified from Okabe_Ito
 const subunitColors = [
   "#991999", // PyMol deeppurple (0.6, 0.1, 0.6)
@@ -2047,5 +2073,5 @@ const subunitColors = [
   "#f0e442",
   "#0072b2",
   "#d55e00",
-  "#cc79a7"
+  "#cc79a7",
 ];
