@@ -4,7 +4,7 @@ import {
   EntityColorScale,
   PaeColorScale,
   Residue,
-  RgbColor
+  RgbColor,
 } from "./types";
 import { Utils } from "./utils.js";
 
@@ -128,8 +128,15 @@ export class PaeViewer<
     }
   }
 
-  private _paeColorScale: PaeColorScale = (scale) =>
-    Array(3).fill(scale * 255) as any as RgbColor;
+  // dark to light green scale; linear interpolation of:
+  // chroma.cubehelix().start(120).rotations(0).hue(0.8)
+  //       .gamma(1).lightness([0.2, 0.95]);
+  // simplified to eliminate chroma dependency
+  private _paeColorScale: PaeColorScale = this.lerpColors([
+    [27, 66, 35],
+    [110, 170, 122],
+    [235, 247, 237],
+  ]);
 
   public get entityColorScale(): EntityColorScale<E> {
     return this._entityColorScale;
@@ -155,12 +162,12 @@ export class PaeViewer<
     "#f0e442",
     "#0072b2",
     "#d55e00",
-    "#cc79a7"
+    "#cc79a7",
   ];
 
   constructor(root: HTMLElement) {
     this._element = Utils.fromHtml(this._template).querySelector(
-      ".pv-graph"
+      ".pv-graph",
     ) as SVGSVGElement;
 
     root.appendChild(this._element);
@@ -188,7 +195,7 @@ export class PaeViewer<
 
   private _createImage(
     pae: number[][],
-    colorScale: (value: number) => RgbColor
+    colorScale: (value: number) => RgbColor,
   ): Promise<Blob> {
     const dim = pae.length;
     const rgbaValues: number[] = new Array(dim ** 2 * 4);
@@ -213,7 +220,7 @@ export class PaeViewer<
       canvas.getContext("bitmaprenderer")!.transferFromImageBitmap(bitmap);
 
       return new Promise((resolve, reject) =>
-        canvas.toBlob((blob) => (blob ? resolve(blob) : reject()))
+        canvas.toBlob((blob) => (blob ? resolve(blob) : reject())),
       );
     });
   }
@@ -225,5 +232,23 @@ export class PaeViewer<
         .querySelector(".pv-pae-matrix")
         ?.setAttribute("href", URL.createObjectURL(image));
     });
+  }
+
+  public lerpColors(colors: RgbColor[]): PaeColorScale {
+    if (colors.length < 2) throw new Error("At least two colors are required.");
+
+    return (value) => {
+      const scaled = value * (colors.length - 1);
+      const index = Math.floor(scaled);
+      const t = scaled - index;
+      const start = colors[index];
+      const end = colors[Math.min(index + 1, colors.length - 1)];
+
+      return [
+        Math.round(start[0] + (end[0] - start[0]) * t),
+        Math.round(start[1] + (end[1] - start[1]) * t),
+        Math.round(start[2] + (end[2] - start[2]) * t),
+      ];
+    };
   }
 }
