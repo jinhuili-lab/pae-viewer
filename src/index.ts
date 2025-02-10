@@ -1,6 +1,6 @@
 import { Utils } from "./utils";
 import chroma from "chroma-js";
-import { saveAs } from 'file-saver';
+import { saveAs } from "file-saver";
 
 export interface Residue {
   symbol: string;
@@ -161,20 +161,19 @@ export class PaeViewer<
   };
 
   constructor(
-    root: any,
-    template: any,
+    root: HTMLElement,
     style = {},
     colorRange = null,
     paePalette = null,
   ) {
     this._root = root;
-    this._template = template;
-    this._element = template.content
-      .querySelector(".pae-viewer")
-      .cloneNode(true);
+    this._element = Utils.createSvgElement("svg", this._root, "pv-graph", {
+      xlmns: "http://www.w3.org/2000/svg",
+      overflow: "visible",
+    });
 
-    this._graph = this._element.querySelector(".pv-graph");
-    this._graphDefs = this._graph.querySelector("defs");
+    this._graph = this._element;
+    this._graphDefs = Utils.createSvgElement("defs", this._graph);
     this._stripePattern = this._graphDefs.querySelector("#stripes-template");
     this._graphArea = this._graph.querySelector(".pv-graph-area");
     this._paeMatrix = this._graphArea.querySelector(".pv-pae-matrix");
@@ -517,7 +516,7 @@ export class PaeViewer<
       outerSvg.setAttribute("width", width);
       outerSvg.setAttribute("height", height);
 
-      const container = Utils.createSVG("g");
+      const container = Utils.createSvgElement("g");
       container.setAttribute(
         "transform",
         `translate(${-bbox.x + pad.left}, ${-bbox.y + pad.top})`,
@@ -629,7 +628,7 @@ export class PaeViewer<
         const otherCoord = { x: "y", y: "x" }[coord];
         const extent = Utils.toPercentage(offset + ratio);
 
-        const line = Utils.createSVG("line", "pv-dividers", {
+        const line = Utils.createSvgElement("line", "pv-dividers", {
           stroke: this._style.elements.dividers.color,
           "stroke-width": this._style.elements.dividers.thickness,
           [coord + 1]: extent,
@@ -679,7 +678,7 @@ export class PaeViewer<
     });
 
     for (const [x, y] of Utils.cartesian(indices, indices)) {
-      const region = Utils.createSVG("g", "pv-region", {
+      const region = Utils.createSvgElement("g", "pv-region", {
         opacity: this._style.elements.regions.opacity,
       });
       const id = `${names[x]}-${names[y]}`;
@@ -687,7 +686,7 @@ export class PaeViewer<
 
       this._regionGroup.appendChild(region);
 
-      const background = Utils.createSVG("rect", null, {
+      const background = Utils.createSvgElement("rect", null, {
         x: Utils.toPercentage(offsets[x]),
         y: Utils.toPercentage(offsets[y]),
         width: Utils.toPercentage(lengths[x]),
@@ -700,7 +699,7 @@ export class PaeViewer<
       const labelY = offsets[y] + lengths[y] / 2;
       const fontSize = this._style.elements.regions.fontSize as any as number;
 
-      const label = Utils.createSVG("text", null, {
+      const label = Utils.createSvgElement("text", null, {
         x: Utils.toPercentage(labelX),
         y: Utils.toPercentage(labelY),
         "text-anchor": "middle",
@@ -753,8 +752,8 @@ export class PaeViewer<
         } else {
           label.textContent = "/";
 
-          const upper = Utils.createSVG("text");
-          const lower = Utils.createSVG("text");
+          const upper = Utils.createSvgElement("text");
+          const lower = Utils.createSvgElement("text");
 
           upper.textContent = names[x];
           lower.textContent = names[y];
@@ -1221,7 +1220,7 @@ export class PaeViewer<
     const [coordX, coordY] = point;
     const style = this._style.elements.selection;
 
-    const lineTemplate = Utils.createSVG("line", "pv-selection-line", {
+    const lineTemplate = Utils.createSvgElement("line", "pv-selection-line", {
       stroke: style.lines.color,
       "stroke-width": style.lines.thickness,
       "stroke-dasharray": style.lines.dashLength,
@@ -1238,7 +1237,7 @@ export class PaeViewer<
       this._selectionGroup.appendChild(line);
     }
 
-    const markerTemplate = Utils.createSVG("circle", "pv-selection-marker", {
+    const markerTemplate = Utils.createSvgElement("circle", "pv-selection-marker", {
       stroke: style.markers.outlineColor,
       "stroke-width": style.markers.outlineThickness,
       r: style.markers.size,
@@ -1296,17 +1295,17 @@ export class PaeViewer<
     const style = this._style.elements.selection;
     this._selection.start = from;
 
-    const rect = Utils.createSVG("rect", "pv-selection-rect", {
+    const rect = Utils.createSvgElement("rect", "pv-selection-rect", {
       fill: style.rect.color,
       opacity: style.rect.opacity,
       stroke: "none",
     });
-    this.setRect(rect, ...from as [any, any], ...to as [any, any]);
+    this.setRect(rect, ...(from as [any, any]), ...(to as [any, any]));
     this._selection.rect = rect;
     this._selectionGroup.appendChild(rect);
     this._selection.lines = [];
 
-    const lineTemplate = Utils.createSVG("line", "pv-selection-line", {
+    const lineTemplate = Utils.createSvgElement("line", "pv-selection-line", {
       stroke: style.lines.color,
       "stroke-width": style.lines.thickness,
       "stroke-dasharray": style.lines.dashLength,
@@ -1320,7 +1319,7 @@ export class PaeViewer<
 
     this._updateSelectionLines(from, to);
 
-    const markerTemplate = Utils.createSVG("circle", "pv-selection-marker", {
+    const markerTemplate = Utils.createSvgElement("circle", "pv-selection-marker", {
       fill: style.markers.outlineColor,
       stroke: style.markers.outlineColor,
       "stroke-width": style.markers.outlineThickness,
@@ -1334,7 +1333,7 @@ export class PaeViewer<
       this._selection.rangeMarkers.push(marker);
     }
 
-    const rangeLineTemplate = Utils.createSVG("line", "pv-range-line", {
+    const rangeLineTemplate = Utils.createSvgElement("line", "pv-range-line", {
       "stroke-width": style.lines.thickness,
     });
     this._selection.rangeLines = [];
@@ -1438,7 +1437,11 @@ export class PaeViewer<
   selectRangeUpdate(to: any) {
     const from = this._selection.start;
 
-    this.setRect(this._selection.rect, ...from as [any, any], ...to as [any, any]);
+    this.setRect(
+      this._selection.rect,
+      ...(from as [any, any]),
+      ...(to as [any, any]),
+    );
 
     // rectangle markers
     for (const [i, [cx, cy]] of [
@@ -1530,7 +1533,7 @@ export class PaeViewer<
 
     const ratio = this._relative(value + offset);
 
-    const tick = Utils.createSVG("line", null, {
+    const tick = Utils.createSvgElement("line", null, {
       stroke: this._style.elements.ticks.color,
       "stroke-width": this._style.elements.ticks.thickness,
       [axis + 1]: "0",
@@ -1547,7 +1550,7 @@ export class PaeViewer<
     rootTick.appendChild(tick);
     this._addTickLabel(
       rootLabel,
-      ...(axis === "x" ? labelCoords : labelCoords.reverse()) as [any, any],
+      ...((axis === "x" ? labelCoords : labelCoords.reverse()) as [any, any]),
       text !== null ? text : value,
       anchor,
       baseline,
@@ -1608,9 +1611,15 @@ export class PaeViewer<
 
         this._addTickLabel(
           this._sequenceTickLabelsGroup,
-          ...(axis === "x" ? labelCoords : labelCoords.reverse()) as [any, any],
+          ...((axis === "x" ? labelCoords : labelCoords.reverse()) as [
+            any,
+            any,
+          ]),
           member.title,
-          ...(axis === "x" ? ["middle", "auto"] : ["end", "central"]) as [any, any],
+          ...((axis === "x" ? ["middle", "auto"] : ["end", "central"]) as [
+            any,
+            any,
+          ]),
           true,
           {
             "font-weight": style.subunitLabels.fontWeight,
@@ -1635,7 +1644,7 @@ export class PaeViewer<
     horizontalPadding = horizontalPadding * this._viewBox.width;
     verticalPadding = verticalPadding * this._viewBox.height;
 
-    return Utils.createSVG("rect", null, {
+    return Utils.createSvgElement("rect", null, {
       rx: this._style.elements.boxes.roundness,
       fill: this._style.elements.boxes.color,
       opacity: this._style.elements.boxes.opacity,
@@ -1664,7 +1673,7 @@ export class PaeViewer<
   ) {
     const fontSize = this._style.elements.ticks.fontSize as any as number;
 
-    const label = Utils.createSVG("text", "pv-tick-label", {
+    const label = Utils.createSvgElement("text", "pv-tick-label", {
       x: Utils.toPercentage(x),
       y: Utils.toPercentage(y),
       "text-anchor": anchor,
@@ -1721,7 +1730,7 @@ export class PaeViewer<
       const markerPair = [];
 
       for (const [coord1, coord2] of [coords, [...coords].reverse()]) {
-        const crosslinkMarker = Utils.createSVG(
+        const crosslinkMarker = Utils.createSvgElement(
           "circle",
           "pv-crosslink-marker",
           {
@@ -1853,8 +1862,7 @@ export class PaeViewer<
 
 const template = `
 <template id="pae-viewer-template">
-  <div class="pae-viewer">
-    <svg class="pv-graph"
+  <svg class="pv-graph"
          xmlns="http://www.w3.org/2000/svg"
          overflow="visible"
     >
@@ -1930,53 +1938,6 @@ const template = `
         </g>
       </g>
     </svg>
-    <div class="pv-color-legend">
-      <div class="pv-color-scale"></div>
-      <div class="pv-color-ticks">
-        <span style="position: relative">&nbsp;</span> <!-- placeholder -->
-        <span style="left: 0%">0</span>
-      </div>
-      <div class="pv-color-legend-label">
-        Expected position error (Ångströms)
-      </div>
-    </div>
-    <div class="pv-status">
-      <div>
-        <div><b>Cursor</b>:</div>
-        <div class="pv-status-cursor"></div>
-      </div>
-      <div>
-        <div><b>Selection</b>:</div>
-        <div class="pv-status-selection"></div>
-      </div>
-    </div>
-    <div class="pv-region-toggle">
-      <div>
-        <label>
-          <input type="checkbox" name="toggleRegion">
-          toggle region overlay
-        </label>
-      </div>
-      <div>
-        <small>
-          (alternatively, hold the 'Shift' key when the cursor is within
-          the PAE Viewer)
-        </small>
-      </div>
-    </div>
-    <div class="d-flex flex-column align-items-center">
-      <div class="m-2">
-        <a class="pv-download-matrix btn btn-primary hidden" download>
-          Download PAE matrix image
-        </a>
-      </div>
-      <div class="m-2">
-        <a class="pv-download-svg btn btn-primary" download>
-          Download graph as SVG
-        </a>
-      </div>
-    </div>
-  </div>
 </template>
 `;
 
