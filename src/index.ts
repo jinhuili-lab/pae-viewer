@@ -97,12 +97,7 @@ export class PaeViewer<
     this._pae = matrix;
 
     if (matrix) {
-      this._createImage(matrix, this._paeColorScale).then((image) => {
-        this._image = image;
-        this._element
-          .querySelector(".pv-pae-matrix")
-          ?.setAttribute("href", URL.createObjectURL(image));
-      });
+      this._updateImage(matrix, this._paeColorScale);
     } else {
       this._image = undefined;
       this._element.querySelector(".pv-pae-matrix")?.setAttribute("href", "");
@@ -127,6 +122,10 @@ export class PaeViewer<
 
   public set paeColorScale(scale: PaeColorScale) {
     this._paeColorScale = scale;
+
+    if (this.pae) {
+      this._updateImage(this.pae, scale);
+    }
   }
 
   private _paeColorScale: PaeColorScale = (scale) =>
@@ -216,6 +215,15 @@ export class PaeViewer<
       return new Promise((resolve, reject) =>
         canvas.toBlob((blob) => (blob ? resolve(blob) : reject()))
       );
+    });
+  }
+
+  private _updateImage(pae: number[][], colorScale: PaeColorScale) {
+    this._createImage(pae, colorScale).then((image) => {
+      this._image = image;
+      this._element
+        .querySelector(".pv-pae-matrix")
+        ?.setAttribute("href", URL.createObjectURL(image));
     });
   }
 }
