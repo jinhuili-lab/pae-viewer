@@ -28,9 +28,83 @@ export class PaeViewer<
   E extends Entity = Entity,
   C extends Crosslink = Crosslink,
 > {
-  private _root: any;
-  private _template: any;
-  private _element: any;
+  private readonly _template: string = `
+<svg class="pv-graph"  xmlns="http://www.w3.org/2000/svg" overflow="visible">
+  <defs>
+    <linearGradient id="rangeMarkerLower"
+                    gradientTransform="rotate(45 0.5 0.5)">
+      <stop offset="0%" stop-color="cyan" />
+      <stop offset="50%" stop-color="cyan" />
+      <stop offset="50%" stop-color="magenta" />
+      <stop offset="100%" stop-color="magenta" />
+    </linearGradient>
+    <linearGradient id="rangeMarkerLowerReversed"
+                    gradientTransform="rotate(45 0.5 0.5)">
+      <stop offset="0%" stop-color="orange" />
+      <stop offset="50%" stop-color="orange" />
+      <stop offset="50%" stop-color="magenta" />
+      <stop offset="100%" stop-color="magenta" />
+    </linearGradient>
+    <linearGradient id="rangeMarkerUpper"
+                    gradientTransform="rotate(45 0.5 0.5)">
+      <stop offset="0%" stop-color="magenta" />
+      <stop offset="50%" stop-color="magenta" />
+      <stop offset="50%" stop-color="orange" />
+      <stop offset="100%" stop-color="orange" />
+    </linearGradient>
+    <linearGradient id="rangeMarkerUpperReversed"
+                    gradientTransform="rotate(45 0.5 0.5)">
+      <stop offset="0%" stop-color="magenta" />
+      <stop offset="50%" stop-color="magenta" />
+      <stop offset="50%" stop-color="cyan" />
+      <stop offset="100%" stop-color="cyan" />
+    </linearGradient>
+    <pattern id="stripes-template" patternUnits="userSpaceOnUse"
+             width="2%" height="2%" patternTransform="rotate(45)">
+      <rect x="0" y="0" width="2%" height="2%" fill="red"></rect>
+      <line x1="0" y1="0" x2="0" y2="2%"
+            stroke="#00FF00" stroke-width="2%" />
+    </pattern>
+  </defs>
+
+  <g class="pv-graph-area">
+    <image
+      class="pv-pae-matrix"
+      width="100%"
+      height="100%"
+      style="image-rendering:pixelated"
+    />
+    <g class="pv-axes">
+      <text class="pv-axis-x-label" x="50%" y="-25%" text-anchor="middle"
+            font-family="Arial, Helvetica, sans-serif">
+        Scored residue / atom
+      </text>
+      <text class="pv-axis-y-label" x="-35%" y="50%" text-anchor="middle"
+            font-family="Arial, Helvetica, sans-serif"
+            transform-origin="-35% 50%" transform="rotate(-90)">
+        Aligned residue / atom
+      </text>
+      <line class="pv-axis-x" x1="-5%" y1="0" x2="105%" y2="0" />
+      <line class="pv-axis-y" x1="0" y1="-5%" x2="0" y2="105%" />
+      <line class="pv-axis-diagonal" x1="0" y1="0" x2="102%" y2="102%" />
+      <g class="pv-sequence-ticks"></g>
+      <g class="pv-unit-ticks"></g>
+      <g class="pv-unit-tick-labels"></g>
+      <g class="pv-sequence-tick-labels"></g>
+    </g>
+    <g class="pv-dividers"></g>
+    <g class="pv-interactive-layer">
+      <rect class="pv-backdrop" x="0" y="0"
+            width="100%" height="100%" opacity="0" />
+      <g class="pv-selections"></g>
+      <g class="pv-crosslinks"></g>
+      <g class="pv-regions"></g>
+    </g>
+  </g>
+</svg>
+`;
+
+  private _element: SVGSVGElement;
 
   private _graph: any;
   private _graphDefs: any;
@@ -167,10 +241,7 @@ export class PaeViewer<
     paePalette = null,
   ) {
     this._root = root;
-    this._element = Utils.createSvgElement("svg", this._root, "pv-graph", {
-      xlmns: "http://www.w3.org/2000/svg",
-      overflow: "visible",
-    });
+    this._element = Utils.fromHtml(this._template).querySelector("pv-graph");
 
     this._graph = this._element;
     this._graphDefs = Utils.createSvgElement("defs", this._graph);
@@ -491,30 +562,30 @@ export class PaeViewer<
 
   private _setupSvgDownloadListener() {
     this._downloadSvg.addEventListener("click", (_: any) => {
-      const svg = this._graph.cloneNode(true);
+      const svg = this._element.cloneNode(true) as SVGSVGElement;
 
-      svg.querySelector(".pv-selections").remove();
-      svg.querySelector(".pv-regions").remove();
+      svg.querySelector(".pv-selections")?.remove();
+      svg.querySelector(".pv-regions")?.remove();
 
       // workaround for clients not supporting 'dominant-baseline',
       // e.g. Office applications (Word, PowerPoint)
       for (const text of svg.querySelectorAll(
         "text[dominant-baseline=central]",
       )) {
-        const relativeY = parseFloat(text.getAttribute("y")) / 100;
+        const relativeY = parseFloat(text.getAttribute("y")!) / 100;
         text.removeAttribute("dominant-baseline");
-        text.setAttribute("y", relativeY * this._viewBox.height + 5);
+        text.setAttribute("y", (relativeY * this._viewBox.height + 5).toString());
       }
 
       const pad = { left: 25, right: 25, top: 25, bottom: 25 };
-      const bbox = this._graph.getBBox();
+      const bbox = this._element.getBBox();
       const width = bbox.width + pad.left + pad.right;
       const height = bbox.height + pad.top + pad.bottom;
 
-      const outerSvg = svg.cloneNode(false);
+      const outerSvg = svg.cloneNode(false) as SVGSVGElement;
       outerSvg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-      outerSvg.setAttribute("width", width);
-      outerSvg.setAttribute("height", height);
+      outerSvg.setAttribute("width", width.toString());
+      outerSvg.setAttribute("height", height.toString());
 
       const container = Utils.createSvgElement("g");
       container.setAttribute(
@@ -535,8 +606,8 @@ export class PaeViewer<
 
           reader.onloadend = () => {
             const paeMatrix = svg.querySelector(".pv-pae-matrix");
-            paeMatrix.setAttribute("xlink:href", reader.result);
-            paeMatrix.removeAttribute("href");
+            paeMatrix?.setAttribute("xlink:href", reader.result as string);
+            paeMatrix?.removeAttribute("href");
 
             saveAs(
               new Blob([outerSvg.outerHTML], {
@@ -1237,11 +1308,15 @@ export class PaeViewer<
       this._selectionGroup.appendChild(line);
     }
 
-    const markerTemplate = Utils.createSvgElement("circle", "pv-selection-marker", {
-      stroke: style.markers.outlineColor,
-      "stroke-width": style.markers.outlineThickness,
-      r: style.markers.size,
-    });
+    const markerTemplate = Utils.createSvgElement(
+      "circle",
+      "pv-selection-marker",
+      {
+        stroke: style.markers.outlineColor,
+        "stroke-width": style.markers.outlineThickness,
+        r: style.markers.size,
+      },
+    );
 
     for (const [color, cx, cy] of [
       ["white", coordX, coordY],
@@ -1319,12 +1394,16 @@ export class PaeViewer<
 
     this._updateSelectionLines(from, to);
 
-    const markerTemplate = Utils.createSvgElement("circle", "pv-selection-marker", {
-      fill: style.markers.outlineColor,
-      stroke: style.markers.outlineColor,
-      "stroke-width": style.markers.outlineThickness,
-      r: style.markers.size,
-    });
+    const markerTemplate = Utils.createSvgElement(
+      "circle",
+      "pv-selection-marker",
+      {
+        fill: style.markers.outlineColor,
+        stroke: style.markers.outlineColor,
+        "stroke-width": style.markers.outlineThickness,
+        r: style.markers.size,
+      },
+    );
     this._selection.rangeMarkers = [];
 
     for (let i = 0; i < 4; i++) {
@@ -1859,87 +1938,6 @@ export class PaeViewer<
     return `${residue.name} ${index} (${member.title})`;
   }
 }
-
-const template = `
-<template id="pae-viewer-template">
-  <svg class="pv-graph"
-         xmlns="http://www.w3.org/2000/svg"
-         overflow="visible"
-    >
-      <defs>
-        <linearGradient id="rangeMarkerLower"
-                        gradientTransform="rotate(45 0.5 0.5)">
-          <stop offset="0%"  stop-color="cyan" />
-          <stop offset="50%" stop-color="cyan" />
-          <stop offset="50%" stop-color="magenta" />
-          <stop offset="100%" stop-color="magenta" />
-        </linearGradient>
-        <linearGradient id="rangeMarkerLowerReversed"
-                        gradientTransform="rotate(45 0.5 0.5)">
-          <stop offset="0%"  stop-color="orange" />
-          <stop offset="50%" stop-color="orange" />
-          <stop offset="50%" stop-color="magenta" />
-          <stop offset="100%" stop-color="magenta" />
-        </linearGradient>
-        <linearGradient id="rangeMarkerUpper"
-                        gradientTransform="rotate(45 0.5 0.5)">
-          <stop offset="0%"  stop-color="magenta" />
-          <stop offset="50%" stop-color="magenta" />
-          <stop offset="50%" stop-color="orange" />
-          <stop offset="100%" stop-color="orange" />
-        </linearGradient>
-        <linearGradient id="rangeMarkerUpperReversed"
-                        gradientTransform="rotate(45 0.5 0.5)">
-          <stop offset="0%"  stop-color="magenta" />
-          <stop offset="50%" stop-color="magenta" />
-          <stop offset="50%" stop-color="cyan" />
-          <stop offset="100%" stop-color="cyan" />
-        </linearGradient>
-        <pattern id="stripes-template" patternUnits="userSpaceOnUse"
-                 width="2%" height="2%" patternTransform="rotate(45)">
-          <rect x="0" y="0" width="2%" height="2%" fill="red"></rect>
-          <line x1="0" y1="0" x2="0" y2="2%"
-                stroke="#00FF00" stroke-width="2%" />
-        </pattern>
-      </defs>
-
-      <g class="pv-graph-area">
-        <image
-          class="pv-pae-matrix"
-          width="100%"
-          height="100%"
-          style="image-rendering:pixelated"
-        />
-        <g class="pv-axes">
-          <text class="pv-axis-x-label" x="50%" y="-25%" text-anchor="middle"
-                font-family="Arial, Helvetica, sans-serif">
-            Scored residue / atom
-          </text>
-          <text class="pv-axis-y-label" x="-35%" y="50%" text-anchor="middle"
-                font-family="Arial, Helvetica, sans-serif"
-                transform-origin="-35% 50%" transform="rotate(-90)">
-            Aligned residue / atom
-          </text>
-          <line class="pv-axis-x" x1="-5%" y1="0" x2="105%" y2="0"/>
-          <line class="pv-axis-y" x1="0" y1="-5%" x2="0" y2="105%"/>
-          <line class="pv-axis-diagonal" x1="0" y1="0" x2="102%" y2="102%"/>
-          <g class="pv-sequence-ticks"></g>
-          <g class="pv-unit-ticks"></g>
-          <g class="pv-unit-tick-labels"></g>
-          <g class="pv-sequence-tick-labels"></g>
-        </g>
-        <g class="pv-dividers"></g>
-        <g class="pv-interactive-layer">
-          <rect class="pv-backdrop" x="0" y="0"
-                width="100%" height="100%" opacity="0" />
-          <g class="pv-selections"></g>
-          <g class="pv-crosslinks"></g>
-          <g class="pv-regions"></g>
-        </g>
-      </g>
-    </svg>
-</template>
-`;
 
 interface PaeViewerStyle {
   general: {
