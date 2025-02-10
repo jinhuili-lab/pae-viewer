@@ -4,9 +4,9 @@ import {
   EntityColorScale,
   PaeColorScale,
   Residue,
-  RgbColor,
+  RgbColor
 } from "./types";
-import { Utils } from "./utils";
+import { Utils } from "./utils.js";
 
 export class PaeViewer<
   R extends Residue = Residue,
@@ -93,8 +93,20 @@ export class PaeViewer<
     return this._pae;
   }
 
-  public set pae(value: number[][] | undefined) {
-    this._pae = value;
+  public set pae(matrix: number[][] | undefined) {
+    this._pae = matrix;
+
+    if (matrix) {
+      this._createImage(matrix, this._paeColorScale).then((image) => {
+        this._image = image;
+        this._element
+          .querySelector(".pv-pae-matrix")
+          ?.setAttribute("href", URL.createObjectURL(image));
+      });
+    } else {
+      this._image = undefined;
+      this._element.querySelector(".pv-pae-matrix")?.setAttribute("href", "");
+    }
   }
 
   private _pae: number[][] | undefined;
@@ -103,8 +115,8 @@ export class PaeViewer<
     return this._entities;
   }
 
-  public set entities(value: E[] | undefined) {
-    this._entities = value;
+  public set entities(entities: E[] | undefined) {
+    this._entities = entities;
   }
 
   private _entities: E[] | undefined;
@@ -113,26 +125,27 @@ export class PaeViewer<
     return this._paeColorScale;
   }
 
-  public set paeColorScale(value: PaeColorScale) {
-    this._paeColorScale = value;
+  public set paeColorScale(scale: PaeColorScale) {
+    this._paeColorScale = scale;
   }
 
-  private _paeColorScale: PaeColorScale = (value) =>
-    Array(3).fill(value * 255) as any as RgbColor;
+  private _paeColorScale: PaeColorScale = (scale) =>
+    Array(3).fill(scale * 255) as any as RgbColor;
 
   public get entityColorScale(): EntityColorScale<E> {
     return this._entityColorScale;
   }
 
-  public set entityColorScale(value: EntityColorScale<E>) {
-    this._entityColorScale = value;
+  public set entityColorScale(scale: EntityColorScale<E>) {
+    this._entityColorScale = scale;
   }
 
   private _entityColorScale: EntityColorScale<E> = (_, i) =>
     this._entityColors[i % this._entityColors.length];
 
-  private _element: SVGSVGElement | undefined;
-  private _viewBox: { width: number; height: number } | undefined;
+  private _element: SVGSVGElement;
+  private _viewBox: { width: number; height: number };
+  private _image: Blob | undefined;
 
   // modified from Okabe_Ito
   private readonly _entityColors = [
@@ -143,12 +156,12 @@ export class PaeViewer<
     "#f0e442",
     "#0072b2",
     "#d55e00",
-    "#cc79a7",
+    "#cc79a7"
   ];
 
   constructor(root: HTMLElement) {
     this._element = Utils.fromHtml(this._template).querySelector(
-      ".pv-graph",
+      ".pv-graph"
     ) as SVGSVGElement;
 
     root.appendChild(this._element);
@@ -176,7 +189,7 @@ export class PaeViewer<
 
   private _createImage(
     pae: number[][],
-    colorScale: (value: number) => RgbColor,
+    colorScale: (value: number) => RgbColor
   ): Promise<Blob> {
     const dim = pae.length;
     const rgbaValues: number[] = new Array(dim ** 2 * 4);
@@ -201,7 +214,7 @@ export class PaeViewer<
       canvas.getContext("bitmaprenderer")!.transferFromImageBitmap(bitmap);
 
       return new Promise((resolve, reject) =>
-        canvas.toBlob((blob) => (blob ? resolve(blob) : reject())),
+        canvas.toBlob((blob) => (blob ? resolve(blob) : reject()))
       );
     });
   }
