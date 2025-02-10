@@ -176,8 +176,8 @@ export class Utils {
 }
 
 export interface ElementOptions<E extends Element = Element> {
+  root?: Element;
   id?: string;
   classes?: string[];
-  attributes?: Partial<Record<keyof E, any>>;
-  root?: Element;
+  attributes?: Partial<Record<keyof E | string, any>>;
 }
