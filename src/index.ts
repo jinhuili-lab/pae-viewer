@@ -6,6 +6,7 @@ import {
   Residue,
   RgbColor,
 } from "./types";
+import { Utils } from "./utils";
 
 export class PaeViewer<
   R extends Residue = Residue,
@@ -88,30 +89,6 @@ export class PaeViewer<
 </svg>
 `;
 
-  public get entities(): E[] | undefined {
-    return this._entities;
-  }
-
-  public set entities(value: E[] | undefined) {
-    this._entities = value;
-  }
-
-  public get entityColorScale(): EntityColorScale<E> {
-    return this._entityColorScale;
-  }
-
-  public set entityColorScale(value: EntityColorScale<E>) {
-    this._entityColorScale = value;
-  }
-
-  public get paeColorScale(): PaeColorScale {
-    return this._paeColorScale;
-  }
-
-  public set paeColorScale(value: PaeColorScale) {
-    this._paeColorScale = value;
-  }
-
   public get pae(): number[][] | undefined {
     return this._pae;
   }
@@ -121,11 +98,41 @@ export class PaeViewer<
   }
 
   private _pae: number[][] | undefined;
+
+  public get entities(): E[] | undefined {
+    return this._entities;
+  }
+
+  public set entities(value: E[] | undefined) {
+    this._entities = value;
+  }
+
+  private _entities: E[] | undefined;
+
+  public get paeColorScale(): PaeColorScale {
+    return this._paeColorScale;
+  }
+
+  public set paeColorScale(value: PaeColorScale) {
+    this._paeColorScale = value;
+  }
+
   private _paeColorScale: PaeColorScale = (value) =>
     Array(3).fill(value * 255) as any as RgbColor;
+
+  public get entityColorScale(): EntityColorScale<E> {
+    return this._entityColorScale;
+  }
+
+  public set entityColorScale(value: EntityColorScale<E>) {
+    this._entityColorScale = value;
+  }
+
   private _entityColorScale: EntityColorScale<E> = (_, i) =>
     this._entityColors[i % this._entityColors.length];
-  private _entities: E[] | undefined;
+
+  private _element: SVGSVGElement | undefined;
+  private _viewBox: { width: number, height: number } | undefined;
 
   // modified from Okabe_Ito
   private readonly _entityColors = [
@@ -139,5 +146,17 @@ export class PaeViewer<
     "#cc79a7",
   ];
 
-  constructor() {}
+  constructor(root: HTMLElement) {
+    this._element = Utils.fromHtml(this._template).querySelector(
+      ".pv-graph",
+    ) as SVGSVGElement;
+
+    root.appendChild(this._element);
+
+    const rect = this._element.getBoundingClientRect();
+    this._viewBox = { width: rect.width, height: rect.height };
+    this._element.setAttribute("viewBox", `0 0 ${rect.width} ${rect.height}`);
+    this._element.setAttribute("width", rect.width.toString());
+    this._element.setAttribute("height", rect.height.toString());
+  }
 }
