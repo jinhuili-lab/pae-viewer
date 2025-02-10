@@ -173,6 +173,10 @@ export class Utils {
 
     return gradient;
   }
+
+  public static fromHtml(html: string): DocumentFragment {
+    return document.createRange().createContextualFragment(html);
+  }
 }
 
 export interface ElementOptions<E extends Element = Element> {
