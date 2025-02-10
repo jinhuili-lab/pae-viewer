@@ -1,5 +1,11 @@
-import { Crosslink, Entity, Residue } from "./types";
-import { EntityColorScale, PaeColorScale, RgbColor } from "./index-old";
+import {
+  Crosslink,
+  Entity,
+  EntityColorScale,
+  PaeColorScale,
+  Residue,
+  RgbColor,
+} from "./types";
 
 export class PaeViewer<
   R extends Residue = Residue,
