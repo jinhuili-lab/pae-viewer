@@ -1,4 +1,5 @@
 import { Crosslink, Entity, Residue } from "./types";
+import { EntityColorScale, PaeColorScale, RgbColor } from "./index-old";
 
 export class PaeViewer<
   R extends Residue = Residue,
@@ -80,4 +81,57 @@ export class PaeViewer<
   </g>
 </svg>
 `;
+
+  public get entities(): E[] | undefined {
+    return this._entities;
+  }
+
+  public set entities(value: E[] | undefined) {
+    this._entities = value;
+  }
+
+  public get entityColorScale(): EntityColorScale<E> {
+    return this._entityColorScale;
+  }
+
+  public set entityColorScale(value: EntityColorScale<E>) {
+    this._entityColorScale = value;
+  }
+
+  public get paeColorScale(): PaeColorScale {
+    return this._paeColorScale;
+  }
+
+  public set paeColorScale(value: PaeColorScale) {
+    this._paeColorScale = value;
+  }
+
+  public get pae(): number[][] | undefined {
+    return this._pae;
+  }
+
+  public set pae(value: number[][] | undefined) {
+    this._pae = value;
+  }
+
+  private _pae: number[][] | undefined;
+  private _paeColorScale: PaeColorScale = (value) =>
+    Array(3).fill(value * 255) as any as RgbColor;
+  private _entityColorScale: EntityColorScale<E> = (_, i) =>
+    this._entityColors[i % this._entityColors.length];
+  private _entities: E[] | undefined;
+
+  // modified from Okabe_Ito
+  private readonly _entityColors = [
+    "#991999", // PyMol deeppurple (0.6, 0.1, 0.6)
+    "#00BFBF", // PyMol teal (0, 0.75, 0.75)
+    "#e9967a", // salmon
+    "#009e73",
+    "#f0e442",
+    "#0072b2",
+    "#d55e00",
+    "#cc79a7",
+  ];
+
+  constructor() {}
 }
