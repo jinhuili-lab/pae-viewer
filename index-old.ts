@@ -521,15 +521,7 @@ export class PaeViewer<
     return this._blobFromImageData(new ImageData(raw, dim));
   }
 
-  private;
-
-  _blobFromImageData(data
-                     :
-                     ImageData;
-
-):
-
-  Promise<Blob> {
+  private _blobFromImageData(data: ImageData): Promise<Blob> {
     return createImageBitmap(data).then((bitmap) => {
       const canvas = document.createElement("canvas");
       canvas.width = bitmap.width;
@@ -872,12 +864,17 @@ any;
   });
 }
 
-  private _updateCursorStatus(event: any) {
-    if (!this._isCursorOnGraph) {
-      this._statusCursor.replaceChildren();
-      return;
-    }
-    const coords = this.getRelativeMousePosition(event, false);
+private
+_updateCursorStatus(event
+:
+any;
+)
+{
+  if (!this._isCursorOnGraph) {
+    this._statusCursor.replaceChildren();
+    return;
+  }
+  const coords = this.getRelativeMousePosition(event, false);
 
   const isCrosslink = event.target.classList.contains("pv-crosslink-marker");
 
@@ -1539,8 +1536,12 @@ any;
   return rangeSelection;
 }
 
-  selectRangeEnd(to: any) {
-    const selection = this.selectRangeUpdate(to);
+selectRangeEnd(to
+:
+any;
+)
+{
+  const selection = this.selectRangeUpdate(to);
 
   this._element.dispatchEvent(
     new CustomEvent("pv-select-residue-range", {
@@ -1568,13 +1569,23 @@ any;
   }
 }
 
-  private _calcMeanPae(
-    residueX1: any,
-    residueX2: any,
-    residueY1: any,
-    residueY2: any,
-  ) {
-    const sortNumerically = (a: any, b: any) => a - b;
+private
+_calcMeanPae(
+  residueX1
+:
+any,
+  residueX2;
+:
+any,
+  residueY1;
+:
+any,
+  residueY2;
+:
+any,
+)
+{
+  const sortNumerically = (a: any, b: any) => a - b;
 
   const [x1, x2] = this._getCoordStrings([residueX1, residueX2])
     .map((residue: any) => residue.index)
@@ -1593,18 +1604,34 @@ any;
   );
 }
 
-  private _addTick(
-    rootTick: any,
-    rootLabel: any,
-    axis: any,
-    value: any,
-    offset: any,
-    tickLength: any,
-    text: any = null,
-  ) {
-    const otherAxis = axis === "x" ? "y" : "x";
-    const anchor = axis === "x" ? "middle" : "end";
-    const baseline = axis === "x" ? "auto" : "central";
+private
+_addTick(
+  rootTick
+:
+any,
+  rootLabel;
+:
+any,
+  axis;
+:
+any,
+  value;
+:
+any,
+  offset;
+:
+any,
+  tickLength;
+:
+any,
+  text;
+:
+any = null,
+)
+{
+  const otherAxis = axis === "x" ? "y" : "x";
+  const anchor = axis === "x" ? "middle" : "end";
+  const baseline = axis === "x" ? "auto" : "central";
 
   const ratio = this._relative(value + offset);
 
@@ -1632,11 +1659,16 @@ any;
   );
 }
 
-  private _addTicks(members: any) {
-    let offset = 0;
-    let lastSubunit = null;
-    const style = this._style.elements;
-    const interval = style.ticks.unitInterval;
+private
+_addTicks(members
+:
+any;
+)
+{
+  let offset = 0;
+  let lastSubunit = null;
+  const style = this._style.elements;
+  const interval = style.ticks.unitInterval;
 
   this._addTickLabel(
     this._axesGroup,
@@ -1710,14 +1742,24 @@ any;
   }
 }
 
-  private _createBackgroundBox(
-    box: any,
-    horizontalPadding: any = 0,
-    verticalPadding: any = 0,
-    params: any = {},
-  ) {
-    horizontalPadding = horizontalPadding * this._viewBox.width;
-    verticalPadding = verticalPadding * this._viewBox.height;
+private
+_createBackgroundBox(
+  box
+:
+any,
+  horizontalPadding;
+:
+any = 0,
+  verticalPadding;
+:
+any = 0,
+  params;
+:
+any = {},
+)
+{
+  horizontalPadding = horizontalPadding * this._viewBox.width;
+  verticalPadding = verticalPadding * this._viewBox.height;
 
   return Utils.createSvgElement("rect", null, {
     rx: this._style.elements.boxes.roundness,
@@ -1735,18 +1777,32 @@ any;
   });
 }
 
-  private _addTickLabel(
-    root: any,
-    x: any,
-    y: any,
-    text: any,
-    anchor: any,
-    baseline: any,
-    addBackground = true,
-    params = {},
-    backgroundParams = {},
-  ) {
-    const fontSize = this._style.elements.ticks.fontSize as any as number;
+private
+_addTickLabel(
+  root
+:
+any,
+  x;
+:
+any,
+  y;
+:
+any,
+  text;
+:
+any,
+  anchor;
+:
+any,
+  baseline;
+:
+any,
+  addBackground = true,
+  params = {},
+  backgroundParams = {},
+)
+{
+  const fontSize = this._style.elements.ticks.fontSize as any as number;
 
   const label = Utils.createSvgElement("text", "pv-tick-label", {
     x: Utils.toPercentage(x),
@@ -1771,9 +1827,15 @@ any;
   }
 }
 
-  addCrosslinks(crosslinks: any, members: any) {
-    this._crosslinks = crosslinks;
-    let offset = 0;
+addCrosslinks(crosslinks
+:
+any, members;
+:
+any;
+)
+{
+  this._crosslinks = crosslinks;
+  let offset = 0;
 
   for (const member of members) {
     member["offset"] = offset;
@@ -1896,21 +1958,24 @@ any;
   });
 }
 
-  private _dispatchSelectionReset() {
-    this._element.dispatchEvent(
-      new CustomEvent("pv-reset-selection", {
-        bubbles: true,
-        detail: {
-          complex: this._complex,
-        },
-      }),
-    );
-  }
+private
+_dispatchSelectionReset();
+{
+  this._element.dispatchEvent(
+    new CustomEvent("pv-reset-selection", {
+      bubbles: true,
+      detail: {
+        complex: this._complex
+      }
+    })
+  );
+}
 
-  deselectAll(dispatchEvent = true) {
-    if (dispatchEvent) {
-      this._dispatchSelectionReset();
-    }
+deselectAll(dispatchEvent = true);
+{
+  if (dispatchEvent) {
+    this._dispatchSelectionReset();
+  }
 
   for (const markerPair of this._crosslinkMarkers) {
     for (const marker of markerPair) {

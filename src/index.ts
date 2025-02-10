@@ -132,7 +132,7 @@ export class PaeViewer<
     this._entityColors[i % this._entityColors.length];
 
   private _element: SVGSVGElement | undefined;
-  private _viewBox: { width: number, height: number } | undefined;
+  private _viewBox: { width: number; height: number } | undefined;
 
   // modified from Okabe_Ito
   private readonly _entityColors = [
@@ -158,5 +158,51 @@ export class PaeViewer<
     this._element.setAttribute("viewBox", `0 0 ${rect.width} ${rect.height}`);
     this._element.setAttribute("width", rect.width.toString());
     this._element.setAttribute("height", rect.height.toString());
+  }
+
+  private _getMax(pae: number[][]): number {
+    let max = 0;
+
+    for (const row of pae) {
+      for (const value of row) {
+        if (value > max) {
+          max = value;
+        }
+      }
+    }
+
+    return max;
+  }
+
+  private _createImage(
+    pae: number[][],
+    colorScale: (value: number) => RgbColor,
+  ): Promise<Blob> {
+    const dim = pae.length;
+    const rgbaValues: number[] = new Array(dim ** 2 * 4);
+    const max = this._getMax(pae);
+
+    for (let y = 0; y < dim; y++) {
+      for (let x = 0; x < dim; x++) {
+        const coord = (y * dim + x) * 4;
+        rgbaValues.splice(coord, 4, ...colorScale(pae[y][x] / max), 255);
+      }
+    }
+
+    const raw = new Uint8ClampedArray(rgbaValues);
+    return this._blobFromImageData(new ImageData(raw, dim));
+  }
+
+  private _blobFromImageData(data: ImageData): Promise<Blob> {
+    return createImageBitmap(data).then((bitmap) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      canvas.getContext("bitmaprenderer")!.transferFromImageBitmap(bitmap);
+
+      return new Promise((resolve, reject) =>
+        canvas.toBlob((blob) => (blob ? resolve(blob) : reject())),
+      );
+    });
   }
 }
