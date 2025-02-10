@@ -49,31 +49,11 @@ export class Utils {
     );
   }
 
-  public static createSVG(
-    type: string,
-    cssClass: string | string[] | null = null,
-    attributes: Record<string, any> = {},
-  ): SVGElement {
-    const el = document.createElementNS("http://www.w3.org/2000/svg", type);
-
-    if (cssClass !== null) {
-      if (typeof cssClass === "string") {
-        el.classList.add(cssClass);
-      } else {
-        // multiple classes
-        el.classList.add(...cssClass);
-      }
-    }
-    Utils.setAttributes(el, attributes);
-
-    return el;
-  }
-
-  public static setAttributes(
-    element: Element,
-    params: Record<string, any>,
+  public static setAttributes<E extends Element = Element>(
+    element: E,
+    attributes: Partial<E> & Record<string, any>,
   ): void {
-    for (const [attribute, value] of Object.entries(params)) {
+    for (const [attribute, value] of Object.entries(attributes)) {
       element.setAttribute(attribute, value);
     }
   }
@@ -133,9 +113,71 @@ export class Utils {
     return values.map((value) => (sum += value));
   }
 
-  public static *range(start: number, end: number, step = 1): Generator<number> {
+  public static *range(
+    start: number,
+    end: number,
+    step = 1,
+  ): Generator<number> {
     for (let i = start; i < end; i += step) {
       yield i;
     }
   }
+
+  public static createSvgElement<K extends keyof SVGElementTagNameMap>(
+    name: K,
+    options?: ElementOptions<SVGElementTagNameMap[K]>,
+  ): SVGElementTagNameMap[K] {
+    const element = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      name,
+    );
+
+    options?.root?.appendChild(element);
+
+    if (options?.classes) {
+      element.classList.add(...options?.classes);
+    }
+
+    if (options?.attributes) {
+      Utils.setAttributes(element, options?.attributes);
+    }
+
+    return element;
+  }
+
+  public static createDiagonalGradient(
+    id: string,
+    startColor: string,
+    endColor: string,
+  ) {
+    const gradient = Utils.createSvgElement("linearGradient", {
+      id: id,
+      attributes: {
+        gradientTransform: "rotate(45 0.5 0.5)",
+      },
+    });
+
+    for (const [offset, stopColor] of [
+      ["0%", startColor],
+      ["50%", startColor],
+      ["50%", endColor],
+      ["100%", endColor],
+    ]) {
+      Utils.createSvgElement("stop", {
+        attributes: {
+          offset: offset,
+          ["stop-color" as keyof SVGStopElement]: stopColor,
+        },
+      });
+    }
+
+    return gradient;
+  }
+}
+
+export interface ElementOptions<E extends Element = Element> {
+  id?: string;
+  classes?: string[];
+  attributes?: Partial<Record<keyof E, any>>;
+  root?: Element;
 }
