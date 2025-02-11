@@ -177,29 +177,6 @@ export class Utils {
   public static fromHtml(html: string): DocumentFragment {
     return document.createRange().createContextualFragment(html);
   }
-
-  public static sheetFromStyle(style: Style): CSSStyleSheet {
-    const sheet = new CSSStyleSheet();
-    for (const [selector, rules] of Object.entries(style)) {
-      const ruleString = Object.entries(rules)
-        .map(([attribute, value]) => `${attribute}: ${value}`)
-        .join("; ");
-      sheet.insertRule(`${selector} { ${ruleString} }`);
-    }
-    return sheet;
-  }
-
-  public static getStyleRulesAsText(sheet: CSSStyleSheet): string[] {
-    return Array.from(sheet.cssRules).map((rule) => rule.cssText);
-  }
-}
-
-export interface Style extends Record<string, StyleRules> {
-  [selector: string]: StyleRules;
-}
-
-export interface StyleRules extends Record<string, string> {
-  [attribute: string]: string;
 }
 
 export interface ElementOptions<E extends Element = Element> {
