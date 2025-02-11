@@ -15,7 +15,7 @@ export interface Residue {
 }
 
 export interface Entity<R extends Residue = Residue> {
-  id: any;
+  id: string | number;
   name?: string;
   sequence: R[];
 }
