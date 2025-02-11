@@ -196,10 +196,12 @@ export class PaeViewer<
     root.appendChild(this._element);
 
     const rect = this._element.getBoundingClientRect();
-    this._viewBox = { width: rect.width, height: rect.height };
-    this._element.setAttribute("viewBox", `0 0 ${rect.width} ${rect.height}`);
-    this._element.setAttribute("width", rect.width.toString());
-    this._element.setAttribute("height", rect.height.toString());
+    const dim = Math.min(rect.width, rect.height);
+
+    this._viewBox = { width: dim, height: dim };
+    this._element.setAttribute("viewBox", `0 0 ${dim} ${dim}`);
+    this._element.setAttribute("width", dim.toString());
+    this._element.setAttribute("height", dim.toString());
   }
 
   private _createImage(
