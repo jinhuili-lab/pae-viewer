@@ -7,7 +7,7 @@ import {
   Residue,
   RgbColor,
 } from "./types.js";
-import { Utils } from "./utils.js";
+import { Style, Utils } from "./utils.js";
 import { PaeUtils } from "./pae-utils.js";
 
 export class PaeViewer<
@@ -17,6 +17,33 @@ export class PaeViewer<
 > {
   private readonly _template: string = `
 <svg class="pv-graph"  xmlns="http://www.w3.org/2000/svg" overflow="visible">
+  <style>
+    :root {
+      --pv-chart-color: black;
+      --pv-chart-line-thickness: 0.2%;
+      --pv-font-size: 0.04;
+      --pv-selection-outline-color: white;
+      --pv-marker-outline-color: white;
+      --pv-marker-outline-thickness: 0.2%;
+      --pv-marker-size: 1%;
+    }
+
+    .pv-axes > line {
+      color: var(--pv-chart-color);
+      stroke-width: var(--pv-chart-line-thickness);
+    }
+
+    .pv-boxes > real
+
+    text {
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .pv-divider {
+      stroke: var(--pv-chart-color);
+      stroke-width: 0.4%;
+    }
+  </style>
+  <style data-id="overwrites"></style>
   <defs>
     <linearGradient id="rangeMarkerLower"
                     gradientTransform="rotate(45 0.5 0.5)">
@@ -109,6 +136,20 @@ export class PaeViewer<
 
   private _paeData: PaeData | undefined;
 
+  public setStyle(style: Style | CSSStyleSheet | null) {
+    if (style instanceof CSSStyleSheet) {
+      this._styleElement.replaceChildren(...Utils.getStyleRulesAsText(style));
+    } else if (style) {
+      // `Style object`
+      this._styleElement.replaceChildren(
+        ...Utils.getStyleRulesAsText(Utils.sheetFromStyle(style)),
+      );
+    } else {
+      // nullish
+      this._styleElement.replaceChildren();
+    }
+  }
+
   public get entities(): E[] | undefined {
     return this._entities;
   }
@@ -173,6 +214,7 @@ export class PaeViewer<
     this._entityColors[i % this._entityColors.length];
 
   private _element: SVGSVGElement;
+  private _styleElement: SVGStyleElement;
   private _viewBox: { width: number; height: number };
   private _image: Blob | undefined;
 
@@ -192,6 +234,10 @@ export class PaeViewer<
     this._element = Utils.fromHtml(this._template).querySelector(
       ".pv-graph",
     ) as SVGSVGElement;
+
+    this._styleElement = this._element.querySelector(
+      "svg style[data-id=overwrites]",
+    )!;
 
     root.appendChild(this._element);
 
@@ -282,6 +328,32 @@ export class PaeViewer<
           },
         });
       }
+    }
+  }
+
+  private _validatePaeData(data: PaeData) {
+    PaeUtils.validated(data.pae);
+
+    if (data.entities.length === 0) {
+      throw new Error("Entities must not be empty.");
+    }
+
+    if (
+      new Set(data.entities.map((entity) => entity.id)).size !==
+      data.entities.length
+    ) {
+      throw new Error("Entities must have unique IDs.");
+    }
+
+    const totalSequenceLength = Utils.sum(
+      data.entities.map((entity) => entity.sequence.length),
+    );
+
+    if (totalSequenceLength !== data.pae.length) {
+      throw new Error(
+        `The sum of the entity sequence lengths (${totalSequenceLength}) ` +
+          `does not match the PAE matrix dimension (${data.pae.length}).`,
+      );
     }
   }
 }
