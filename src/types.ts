@@ -1,3 +1,14 @@
+export interface PaeData<
+  E extends Entity = Entity,
+  C extends Crosslink = Crosslink,
+> {
+  pae: Pae;
+  entities: E[];
+  crosslinks: C[];
+}
+
+export type Pae = number[][];
+
 export interface Residue {
   symbol: string;
   name?: string;
@@ -24,4 +35,7 @@ export type RgbColor = [number, number, number];
 /** Takes a value from 0 to 1 and returns an RGB color. */
 export type PaeColorScale = (value: number) => RgbColor;
 
-export type EntityColorScale<E extends Entity> = (Entity: E, index: number) => string;
+export type EntityColorScale<E extends Entity> = (
+  Entity: E,
+  index: number,
+) => string;
