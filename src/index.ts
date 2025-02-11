@@ -202,27 +202,13 @@ export class PaeViewer<
     this._element.setAttribute("height", rect.height.toString());
   }
 
-  private _getMax(pae: number[][]): number {
-    let max = 0;
-
-    for (const row of pae) {
-      for (const value of row) {
-        if (value > max) {
-          max = value;
-        }
-      }
-    }
-
-    return max;
-  }
-
   private _createImage(
     pae: number[][],
     colorScale: (value: number) => RgbColor,
   ): Promise<Blob> {
     const dim = pae.length;
     const rgbaValues: number[] = new Array(dim ** 2 * 4);
-    const max = this._getMax(pae);
+    const max = PaeUtils.getMax(pae);
 
     for (let y = 0; y < dim; y++) {
       for (let x = 0; x < dim; x++) {

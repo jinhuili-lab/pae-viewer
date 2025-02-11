@@ -61,4 +61,18 @@ export class PaeUtils {
 
     return pae as Pae;
   }
+
+  public static getMax(pae: Pae): number {
+    let max = 0;
+
+    for (const row of pae) {
+      for (const value of row) {
+        if (value > max) {
+          max = value;
+        }
+      }
+    }
+
+    return max;
+  }
 }
