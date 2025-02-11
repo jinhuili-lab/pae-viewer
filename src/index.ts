@@ -126,8 +126,14 @@ export class PaeViewer<
     this._paeData = data;
 
     if (data) {
-      PaeUtils.validated(data.pae);
+      this._validatePaeData(data);
+
       this._updateImage(data.pae, this._paeColorScale);
+
+      this._addDividers(
+        data.entities.map((entity) => entity.sequence.length),
+        this._element.querySelector(".pv-dividers") as SVGGElement,
+      );
     } else {
       this._image = undefined;
       this._element.querySelector(".pv-pae-matrix")?.setAttribute("href", "");
