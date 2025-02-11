@@ -7,8 +7,10 @@ import {
   Residue,
   RgbColor,
 } from "./types.js";
-import { Style, Utils } from "./utils.js";
+import { Utils } from "./utils.js";
 import { PaeUtils } from "./pae-utils.js";
+import { Style, StyleUtils } from "./style-utils.js";
+import { RegionLayer } from "./region-layer.js";
 
 export class PaeViewer<
   R extends Residue = Residue,
@@ -26,6 +28,7 @@ export class PaeViewer<
       --pv-marker-outline-color: white;
       --pv-marker-outline-thickness: 0.2%;
       --pv-marker-size: 1%;
+      --pv-stripe-width: 2%;
     }
 
     .pv-axes > line {
@@ -33,7 +36,18 @@ export class PaeViewer<
       stroke-width: var(--pv-chart-line-thickness);
     }
 
-    .pv-boxes > real
+    .pv-regions {
+      pattern, pattern > rect {
+          width: var(--pv-stripe-width);
+          height: var(--pv-stripe-width);
+        }
+      }
+
+      pattern > line {
+        y2: var(--pv-stripe-width);
+        stroke-width: var(--pv-stripe-width);
+      }
+    }
 
     text {
       font-family: Arial, Helvetica, sans-serif;
@@ -43,7 +57,8 @@ export class PaeViewer<
       stroke-width: 0.4%;
     }
   </style>
-  <style data-id="overwrites"></style>
+  <style data-id="entity-colors"></style>
+  <style data-id="overrides"></style>
   <defs>
     <linearGradient id="rangeMarkerLower"
                     gradientTransform="rotate(45 0.5 0.5)">
@@ -118,11 +133,11 @@ export class PaeViewer<
 </svg>
 `;
 
-  public get paeData(): PaeData | undefined {
+  public get paeData(): PaeData<E> | undefined {
     return this._paeData;
   }
 
-  public set paeData(data: PaeData | undefined) {
+  public set paeData(data: PaeData<E> | undefined) {
     this._paeData = data;
 
     if (data) {
@@ -130,9 +145,17 @@ export class PaeViewer<
 
       this._updateImage(data.pae, this._paeColorScale);
 
+      this._updateEntityColors(data.entities, this._entityColorScale);
+
       this._addDividers(
         data.entities.map((entity) => entity.sequence.length),
         this._element.querySelector(".pv-dividers") as SVGGElement,
+      );
+
+      this._regionLayer = new RegionLayer(
+        this._element.querySelector(".pv-regions") as SVGGElement,
+        data,
+        this._entityColorScale,
       );
     } else {
       this._image = undefined;
@@ -140,19 +163,35 @@ export class PaeViewer<
     }
   }
 
-  private _paeData: PaeData | undefined;
+  private _paeData: PaeData<E> | undefined;
+
+  private _updateEntityColors(
+    entities: E[],
+    colorScale: EntityColorScale<E>,
+  ): void {
+    this._styleEntityColorsElement.replaceChildren(
+      ...entities.map((entity) =>
+        StyleUtils.createVariableRule(
+          entity.id.toString(),
+          colorScale(entity, entities.indexOf(entity)),
+        ),
+      ),
+    );
+  }
 
   public setStyle(style: Style | CSSStyleSheet | null) {
     if (style instanceof CSSStyleSheet) {
-      this._styleElement.replaceChildren(...Utils.getStyleRulesAsText(style));
+      this._styleOverridesElement.replaceChildren(
+        ...StyleUtils.getStyleRulesAsText(style),
+      );
     } else if (style) {
       // `Style object`
-      this._styleElement.replaceChildren(
-        ...Utils.getStyleRulesAsText(Utils.sheetFromStyle(style)),
+      this._styleOverridesElement.replaceChildren(
+        ...StyleUtils.getStyleRulesAsText(StyleUtils.sheetFromStyle(style)),
       );
     } else {
       // nullish
-      this._styleElement.replaceChildren();
+      this._styleOverridesElement.replaceChildren();
     }
   }
 
@@ -208,6 +247,8 @@ export class PaeViewer<
     [235, 247, 237],
   ]);
 
+  private _regionLayer: RegionLayer<E> | undefined;
+
   public get entityColorScale(): EntityColorScale<E> {
     return this._entityColorScale;
   }
@@ -220,7 +261,8 @@ export class PaeViewer<
     this._entityColors[i % this._entityColors.length];
 
   private _element: SVGSVGElement;
-  private _styleElement: SVGStyleElement;
+  private _styleEntityColorsElement: SVGStyleElement;
+  private _styleOverridesElement: SVGStyleElement;
   private _viewBox: { width: number; height: number };
   private _image: Blob | undefined;
 
@@ -241,8 +283,12 @@ export class PaeViewer<
       ".pv-graph",
     ) as SVGSVGElement;
 
-    this._styleElement = this._element.querySelector(
-      "svg style[data-id=overwrites]",
+    this._styleEntityColorsElement = this._element.querySelector(
+      "svg style[data-id=entity-colors]",
+    )!;
+
+    this._styleOverridesElement = this._element.querySelector(
+      "svg style[data-id=overrides]",
     )!;
 
     root.appendChild(this._element);
