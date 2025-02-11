@@ -3,10 +3,12 @@ import {
   Entity,
   EntityColorScale,
   PaeColorScale,
+  PaeData,
   Residue,
   RgbColor,
-} from "./types";
+} from "./types.js";
 import { Utils } from "./utils.js";
+import { PaeUtils } from "./pae-utils.js";
 
 export class PaeViewer<
   R extends Residue = Residue,
@@ -89,29 +91,50 @@ export class PaeViewer<
 </svg>
 `;
 
-  public get pae(): number[][] | undefined {
-    return this._pae;
+  public get paeData(): PaeData | undefined {
+    return this._paeData;
   }
 
-  public set pae(matrix: number[][] | undefined) {
-    this._pae = matrix;
+  public set paeData(data: PaeData | undefined) {
+    this._paeData = data;
 
-    if (matrix) {
-      this._updateImage(matrix, this._paeColorScale);
+    if (data) {
+      PaeUtils.validated(data.pae);
+      this._updateImage(data.pae, this._paeColorScale);
     } else {
       this._image = undefined;
       this._element.querySelector(".pv-pae-matrix")?.setAttribute("href", "");
     }
   }
 
-  private _pae: number[][] | undefined;
+  private _paeData: PaeData | undefined;
 
   public get entities(): E[] | undefined {
     return this._entities;
   }
 
   public set entities(entities: E[] | undefined) {
+    if (entities) {
+      const ids = new Set(entities.map((entity) => entity.id));
+
+      if (ids.size !== entities.length) {
+        throw new Error("Entities must have unique IDs.");
+      }
+    }
+
     this._entities = entities;
+
+    if (!entities) {
+      return;
+    }
+
+    const sequenceLengths = entities.map(
+      (entity: any) => entity.sequence.length,
+    );
+
+    // this._addDividers(sequenceLengths);
+    // this._addRegions(complex.members);
+    // this._addTicks(complex.members);
   }
 
   private _entities: E[] | undefined;
@@ -123,8 +146,8 @@ export class PaeViewer<
   public set paeColorScale(scale: PaeColorScale) {
     this._paeColorScale = scale;
 
-    if (this.pae) {
-      this._updateImage(this.pae, scale);
+    if (this.paeData) {
+      this._updateImage(this.paeData.pae, scale);
     }
   }
 
@@ -250,5 +273,27 @@ export class PaeViewer<
         Math.round(start[2] + (end[2] - start[2]) * t),
       ];
     };
+  }
+
+  private _addDividers(lengths: number[], group: SVGGElement) {
+    const total = Utils.sum(lengths);
+
+    for (const index of Utils.cumsum(lengths.slice(0, -1))) {
+      for (const coord of ["x", "y"]) {
+        const otherCoord = { x: "y", y: "x" }[coord];
+        const extent = Utils.toPercentage(index / total);
+
+        Utils.createSvgElement("line", {
+          root: group,
+          classes: ["pv-divider"],
+          attributes: {
+            [coord + 1]: extent,
+            [coord + 2]: extent,
+            [otherCoord! + 1]: "0",
+            [otherCoord! + 2]: "100%",
+          },
+        });
+      }
+    }
   }
 }
