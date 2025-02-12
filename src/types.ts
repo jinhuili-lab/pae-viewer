@@ -50,7 +50,7 @@ export interface RelativeIndex<E extends Entity = Entity> {
 export type RgbColor = [number, number, number];
 
 /** Takes a value from 0 to 1 and returns an RGB color. */
-export type PaeColorScale = (value: number) => RgbColor;
+export type LinearColorScale = (value: number) => RgbColor;
 
 export type EntityColorScale<E extends Entity> = (
   Entity: E,

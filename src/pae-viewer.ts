@@ -2,7 +2,7 @@ import {
   Crosslink,
   Entity,
   EntityColorScale,
-  PaeColorScale,
+  LinearColorScale,
   PaeData,
   PaeInput,
   Residue,
@@ -198,11 +198,11 @@ export class PaeViewer<
 
   private _entities: E[] | undefined;
 
-  public get paeColorScale(): PaeColorScale {
+  public get paeColorScale(): LinearColorScale {
     return this._paeColorScale;
   }
 
-  public set paeColorScale(scale: PaeColorScale) {
+  public set paeColorScale(scale: LinearColorScale) {
     this._paeColorScale = scale;
 
     if (this._paeData) {
@@ -214,7 +214,7 @@ export class PaeViewer<
   // chroma.cubehelix().start(120).rotations(0).hue(0.8)
   //       .gamma(1).lightness([0.2, 0.95]);
   // simplified to eliminate chroma dependency
-  private _paeColorScale: PaeColorScale = this.lerpColors([
+  private _paeColorScale: LinearColorScale = Utils.lerpColors([
     [27, 66, 35],
     [110, 170, 122],
     [235, 247, 237],
@@ -307,7 +307,7 @@ export class PaeViewer<
     });
   }
 
-  private _updateImage(pae: number[][], colorScale: PaeColorScale) {
+  private _updateImage(pae: number[][], colorScale: LinearColorScale) {
     this._createImage(pae, colorScale)
       .then((image) => {
         this._image = image;
@@ -318,24 +318,6 @@ export class PaeViewer<
           .querySelector(".pv-pae-matrix")
           ?.setAttribute("href", base64);
       });
-  }
-
-  public lerpColors(colors: RgbColor[]): PaeColorScale {
-    if (colors.length < 2) throw new Error("At least two colors are required.");
-
-    return (value) => {
-      const scaled = value * (colors.length - 1);
-      const index = Math.floor(scaled);
-      const t = scaled - index;
-      const start = colors[index];
-      const end = colors[Math.min(index + 1, colors.length - 1)];
-
-      return [
-        Math.round(start[0] + (end[0] - start[0]) * t),
-        Math.round(start[1] + (end[1] - start[1]) * t),
-        Math.round(start[2] + (end[2] - start[2]) * t),
-      ];
-    };
   }
 
   private _addDividers(lengths: number[], group: SVGGElement) {

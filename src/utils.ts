@@ -1,3 +1,5 @@
+import { LinearColorScale, RgbColor } from "./types";
+
 export class Utils {
   public static splitLines(text: string): string[] {
     return text.split(/\r?\n/);
@@ -185,6 +187,24 @@ export class Utils {
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
+  }
+
+  public static lerpColors(colors: RgbColor[]): LinearColorScale {
+    if (colors.length < 2) throw new Error("At least two colors are required.");
+
+    return (value) => {
+      const scaled = value * (colors.length - 1);
+      const index = Math.floor(scaled);
+      const t = scaled - index;
+      const start = colors[index];
+      const end = colors[Math.min(index + 1, colors.length - 1)];
+
+      return [
+        Math.round(start[0] + (end[0] - start[0]) * t),
+        Math.round(start[1] + (end[1] - start[1]) * t),
+        Math.round(start[2] + (end[2] - start[2]) * t),
+      ];
+    };
   }
 }
 
