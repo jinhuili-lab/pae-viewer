@@ -31,6 +31,9 @@ export class PaeViewer<
       --pv-marker-outline-thickness: 0.2%;
       --pv-marker-size: 1%;
       --pv-stripe-width: 2%;
+      --pv-color-x: cyan;
+      --pv-color-y: orange;
+      --pv-color-overlap: magenta;
     }
 
     .pv-axes > line {
@@ -64,8 +67,8 @@ export class PaeViewer<
   <defs>
     <linearGradient id="rangeMarkerLower"
                     gradientTransform="rotate(45 0.5 0.5)">
-      <stop offset="0%" stop-color="cyan" />
-      <stop offset="50%" stop-color="cyan" />
+      <stop offset="0%" stop-color="var(--pv-color-x)" />
+      <stop offset="50%" stop-color="var(--pv-color-x)" />
       <stop offset="50%" stop-color="magenta" />
       <stop offset="100%" stop-color="magenta" />
     </linearGradient>
@@ -73,22 +76,22 @@ export class PaeViewer<
                     gradientTransform="rotate(45 0.5 0.5)">
       <stop offset="0%" stop-color="orange" />
       <stop offset="50%" stop-color="orange" />
-      <stop offset="50%" stop-color="magenta" />
-      <stop offset="100%" stop-color="magenta" />
+      <stop offset="50%" stop-color="var(--pv-color-overlap)" />
+      <stop offset="100%" stop-color="var(--pv-color-overlap)" />
     </linearGradient>
     <linearGradient id="rangeMarkerUpper"
                     gradientTransform="rotate(45 0.5 0.5)">
-      <stop offset="0%" stop-color="magenta" />
-      <stop offset="50%" stop-color="magenta" />
+      <stop offset="0%" stop-color="var(--pv-color-overlap)" />
+      <stop offset="50%" stop-color="var(--pv-color-overlap)" />
       <stop offset="50%" stop-color="orange" />
       <stop offset="100%" stop-color="orange" />
     </linearGradient>
     <linearGradient id="rangeMarkerUpperReversed"
                     gradientTransform="rotate(45 0.5 0.5)">
-      <stop offset="0%" stop-color="magenta" />
-      <stop offset="50%" stop-color="magenta" />
-      <stop offset="50%" stop-color="cyan" />
-      <stop offset="100%" stop-color="cyan" />
+      <stop offset="0%" stop-color="var(--pv-color-overlap)" />
+      <stop offset="50%" stop-color="var(--pv-color-overlap)" />
+      <stop offset="50%" stop-color="var(--pv-color-x)" />
+      <stop offset="100%" stop-color="var(--pv-color-x)" />
     </linearGradient>
     <pattern id="stripes-template" patternUnits="userSpaceOnUse"
              width="2%" height="2%" patternTransform="rotate(45)">
