@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PAE Viewer Demo</title>
+
+  <script type="module">
+
+  </script>
+
+  <script type="module" defer>
+    import { PaeViewer } from "../dist/index.js";
+    import chroma from "https://cdn.jsdelivr.net/npm/chroma-js@3.1.2/+esm";
+
+    const viewer = new PaeViewer(document.getElementById("pae-viewer"));
+
+    const scale = chroma.cubehelix().start(120).rotations(0)
+      .hue(0.8).gamma(1).lightness([0.2, 0.95]);
+    viewer.paeColorScale = (value) => scale(value).rgb();
+
+    viewer.setPae({
+      pae: [[0, 1, 2], [3, 4, 5], [7, 8, 9]],
+      entities: [{
+        id: 0, sequence: [
+          { symbol: "A", name: "Arginine" },
+          { symbol: "C", name: "Cysteine" }
+        ]
+      },
+      {
+        id: 1,
+        sequence: [
+          { symbol: "D", name: "Aspartic acid" }
+        ]
+      }]
+    });
+
+  </script>
+</head>
+<body>
+<div id="pae-viewer" style="margin: 100px; width: 100px; height: 100px"></div>
+</body>
+</html>
