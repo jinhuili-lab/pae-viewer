@@ -55,8 +55,6 @@ export class RegionLayer<
     for (let i = 0; i < subunits.length; i++) {
       for (let j = i + 1; j < subunits.length; j++) {
         const pattern = template.cloneNode(true) as SVGPatternElement;
-        console.log("template", template);
-        console.log("cloned", pattern);
 
         pattern
           .querySelector("rect")!
@@ -85,22 +83,14 @@ export class RegionLayer<
   private _createRegions(subunits: S[], patterns: PatternMap): SVGGElement[] {
     const total = Utils.sum(subunits.map((subunit) => subunit.length));
 
-    console.log(Array.from(patterns.entries()));
-
     return Array.from(Utils.cartesian(subunits, subunits)).map(
-      ([subunitX, subunitY]) => {
-        console.log(
-          this._getPatternKey(subunitX, subunitY),
-          patterns.get(this._getPatternKey(subunitX, subunitY)),
-        );
-
-        return this._createRegion(
+      ([subunitX, subunitY]) =>
+        this._createRegion(
           subunitX,
           subunitY,
           total,
           patterns.get(this._getPatternKey(subunitX, subunitY))?.id,
-        );
-      },
+        ),
     );
   }
 
@@ -160,6 +150,25 @@ export class RegionLayer<
 
   public resetSelection() {
     this._select(undefined);
+  }
+
+  private _createLabelBox(
+    label: SVGTextElement,
+    horizontalPadding = 0,
+    verticalPadding = 0,
+    params = {},
+  ) {
+    const box = label.getBBox();
+
+    return Utils.createSvgElement("rect", {
+      classes: ["pv-region-label-box"],
+      attributes: {
+        x: box.x - horizontalPadding,
+        y: box.y - verticalPadding,
+        width: box.width + 2 * horizontalPadding,
+        height: box.height + 2 * verticalPadding,
+      },
+    });
   }
 }
 
