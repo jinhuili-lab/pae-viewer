@@ -4,8 +4,10 @@ import {
   EntityColorScale,
   PaeColorScale,
   PaeData,
+  PaeInput,
   Residue,
   RgbColor,
+  Subunit,
 } from "./types.js";
 import { Utils } from "./utils.js";
 import { PaeUtils } from "./pae-utils.js";
@@ -14,8 +16,8 @@ import { RegionLayer } from "./region-layer.js";
 
 export class PaeViewer<
   R extends Residue = Residue,
-  E extends Entity = Entity,
-  C extends Crosslink = Crosslink,
+  E extends Entity<R> = Entity<R>,
+  C extends Crosslink<E> = Crosslink<E>,
 > {
   private readonly _template: string = `
 <svg class="pv-graph"  xmlns="http://www.w3.org/2000/svg" overflow="visible">
@@ -133,31 +135,30 @@ export class PaeViewer<
 </svg>
 `;
 
-  public get paeData(): PaeData<E> | undefined {
+  public getPaeData(): PaeData | undefined {
     return this._paeData;
   }
 
-  public set paeData(data: PaeData<E> | undefined) {
-    this._paeData = data;
-
-    if (data) {
-      this._validatePaeData(data);
-
-      this._updateImage(data.pae, this._paeColorScale);
-
-      this._updateEntityColors(data.entities, this._entityColorScale);
-
+  public setPae(input: PaeInput<E, C> | undefined) {
+    if (input) {
+      this._paeData = this._processInput(input, this._entityColorScale);
+      this._updateImage(this._paeData.pae, this._paeColorScale);
+      this._updateEntityColors(this._paeData.subunits);
       this._addDividers(
-        data.entities.map((entity) => entity.sequence.length),
+        this._paeData.subunits.map((subunit) => subunit.length),
         this._element.querySelector(".pv-dividers") as SVGGElement,
       );
 
       this._regionLayer = new RegionLayer(
         this._element.querySelector(".pv-regions") as SVGGElement,
-        data,
-        this._entityColorScale,
+        this._paeData.subunits,
       );
+
+      // this._addDividers(sequenceLengths);
+      // this._addRegions(complex.members);
+      // this._addTicks(complex.members);
     } else {
+      this._paeData = undefined;
       this._image = undefined;
       this._element.querySelector(".pv-pae-matrix")?.setAttribute("href", "");
     }
@@ -165,15 +166,12 @@ export class PaeViewer<
 
   private _paeData: PaeData<E> | undefined;
 
-  private _updateEntityColors(
-    entities: E[],
-    colorScale: EntityColorScale<E>,
-  ): void {
+  private _updateEntityColors(subunits: Subunit<E>[]): void {
     this._styleEntityColorsElement.replaceChildren(
-      ...entities.map((entity) =>
+      ...subunits.map((subunit) =>
         StyleUtils.createVariableRule(
-          entity.id.toString(),
-          colorScale(entity, entities.indexOf(entity)),
+          subunit.entity.id.toString(),
+          subunit.color,
         ),
       ),
     );
@@ -195,34 +193,6 @@ export class PaeViewer<
     }
   }
 
-  public get entities(): E[] | undefined {
-    return this._entities;
-  }
-
-  public set entities(entities: E[] | undefined) {
-    if (entities) {
-      const ids = new Set(entities.map((entity) => entity.id));
-
-      if (ids.size !== entities.length) {
-        throw new Error("Entities must have unique IDs.");
-      }
-    }
-
-    this._entities = entities;
-
-    if (!entities) {
-      return;
-    }
-
-    const sequenceLengths = entities.map(
-      (entity: any) => entity.sequence.length,
-    );
-
-    // this._addDividers(sequenceLengths);
-    // this._addRegions(complex.members);
-    // this._addTicks(complex.members);
-  }
-
   private _entities: E[] | undefined;
 
   public get paeColorScale(): PaeColorScale {
@@ -232,8 +202,8 @@ export class PaeViewer<
   public set paeColorScale(scale: PaeColorScale) {
     this._paeColorScale = scale;
 
-    if (this.paeData) {
-      this._updateImage(this.paeData.pae, scale);
+    if (this._paeData) {
+      this._updateImage(this._paeData.pae, scale);
     }
   }
 
@@ -383,7 +353,37 @@ export class PaeViewer<
     }
   }
 
-  private _validatePaeData(data: PaeData) {
+  private _processInput(
+    input: PaeInput<E, C>,
+    colorScale: EntityColorScale<E>,
+  ): PaeData<E, C> {
+    this._validatePaeInput(input);
+
+    return {
+      pae: input.pae,
+      subunits: this._processEntities(input.entities, colorScale),
+      crosslinks: input.crosslinks,
+    };
+  }
+
+  private _processEntities(
+    entities: E[],
+    colorScale: EntityColorScale<E>,
+  ): Subunit<E>[] {
+    const total = Utils.sum(entities.map((entity) => entity.sequence.length));
+    const lengths = entities.map((entity) => entity.sequence.length / total);
+    const offsets = [0, ...Utils.cumsum(lengths.slice(0, -1))];
+
+    return entities.map((entity, i) => ({
+      entity: entity,
+      index: i,
+      length: lengths[i],
+      offset: offsets[i],
+      color: colorScale(entity, i),
+    }));
+  }
+
+  private _validatePaeInput(data: PaeInput<E, C>) {
     PaeUtils.validated(data.pae);
 
     if (data.entities.length === 0) {

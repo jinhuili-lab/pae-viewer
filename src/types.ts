@@ -1,9 +1,18 @@
-export interface PaeData<
+export interface PaeInput<
   E extends Entity = Entity,
   C extends Crosslink = Crosslink,
 > {
   pae: Pae;
   entities: E[];
+  crosslinks: C[];
+}
+
+export interface PaeData<
+  E extends Entity = Entity,
+  C extends Crosslink = Crosslink,
+> {
+  pae: Pae;
+  subunits: Subunit<E>[];
   crosslinks: C[];
 }
 
@@ -18,6 +27,14 @@ export interface Entity<R extends Residue = Residue> {
   id: string | number;
   name?: string;
   sequence: R[];
+}
+
+export interface Subunit<E extends Entity = Entity> {
+  entity: E;
+  index: number;
+  length: number;
+  offset: number;
+  color: string;
 }
 
 export interface Crosslink<E extends Entity = Entity> {
