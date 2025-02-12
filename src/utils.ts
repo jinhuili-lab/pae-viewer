@@ -177,6 +177,15 @@ export class Utils {
   public static fromHtml(html: string): DocumentFragment {
     return document.createRange().createContextualFragment(html);
   }
+
+  public static blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
 }
 
 export interface ElementOptions<E extends Element = Element> {

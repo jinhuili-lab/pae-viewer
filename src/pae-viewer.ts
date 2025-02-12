@@ -305,12 +305,16 @@ export class PaeViewer<
   }
 
   private _updateImage(pae: number[][], colorScale: PaeColorScale) {
-    this._createImage(pae, colorScale).then((image) => {
-      this._image = image;
-      this._element
-        .querySelector(".pv-pae-matrix")
-        ?.setAttribute("href", URL.createObjectURL(image));
-    });
+    this._createImage(pae, colorScale)
+      .then((image) => {
+        this._image = image;
+        return Utils.blobToBase64(this._image);
+      })
+      .then((base64) => {
+        this._element
+          .querySelector(".pv-pae-matrix")
+          ?.setAttribute("href", base64);
+      });
   }
 
   public lerpColors(colors: RgbColor[]): PaeColorScale {
