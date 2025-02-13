@@ -1,4 +1,4 @@
-import { Entity, Subunit } from "./types.js";
+import { Subunit } from "./types.js";
 import { Utils } from "./utils.js";
 import { StyleUtils } from "./style-utils.js";
 
@@ -7,10 +7,7 @@ import { StyleUtils } from "./style-utils.js";
  * intersection of two entities in the PAE matrix (or the intersection of one
  * entity with itself).
  */
-export class RegionLayer<
-  E extends Entity = Entity,
-  S extends Subunit<E> = Subunit<E>,
-> {
+export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
   private readonly _defs: SVGDefsElement = Utils.fromHtml(
     `
     <svg xmlns="http://www.w3.org/2000/svg">
@@ -29,7 +26,9 @@ export class RegionLayer<
   private _selected: SVGGElement | undefined;
 
   public constructor(root: SVGGElement, subunits: S[]) {
+    super();
     this._root = root;
+    this._root.replaceChildren();
 
     const patterns = this._createPatterns(
       subunits,
@@ -95,8 +94,8 @@ export class RegionLayer<
   }
 
   private _createRegion(
-    subunitX: Subunit,
-    subunitY: Subunit,
+    subunitX: S,
+    subunitY: S,
     totalLength: number,
     patternId?: string,
   ) {
@@ -131,11 +130,11 @@ export class RegionLayer<
 
     region.addEventListener("click", () => {
       this._select(region);
-      this._root.dispatchEvent(
+      this.dispatchEvent(
         new CustomEvent<RegionSelection<S>>("pv-select-region", {
           bubbles: true,
           detail: { subunitX: subunitX, subunitY: subunitY },
-        }),
+        }) satisfies RegionSelectionEvent,
       );
     });
 
@@ -176,9 +175,11 @@ export class RegionLayer<
 type PatternKey = string;
 type PatternMap = Map<PatternKey, SVGPatternElement>;
 
-export type RegionSelectionEvent = CustomEvent<RegionSelection>;
+export type RegionSelectionEvent<S extends Subunit = Subunit> = CustomEvent<
+  RegionSelection<S>
+>;
 
 export interface RegionSelection<S extends Subunit = Subunit> {
-  subunitX: Subunit;
-  subunitY: Subunit;
+  subunitX: S;
+  subunitY: S;
 }
