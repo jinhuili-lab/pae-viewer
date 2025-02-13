@@ -1,56 +1,6 @@
 import { LinearColorScale, RgbColor } from "./types";
 
 export class Utils {
-  public static splitLines(text: string): string[] {
-    return text.split(/\r?\n/);
-  }
-
-  /**
-   * Create table (arrays of rows as Maps) from DSV
-   * (Delimiter-Separated Values) string (multiple lines).
-   *
-   * @param dsv string in DSV format
-   * @param headers array of column names; if null, treat first row as
-   *                column names
-   * @param sep separator character
-   * @returns {*}
-   */
-  public static readDSV(
-    dsv: string,
-    headers: string[] | null = null,
-    sep: string = "\t",
-  ): Map<string, string>[] {
-    let rows = Utils.splitLines(dsv)
-      .filter((line) => line !== "")
-      .map((line) => line.split(sep));
-
-    if (headers === null) {
-      headers = rows[0];
-      rows = rows.slice(1);
-    }
-
-    for (const [i, row] of rows.entries()) {
-      if (row.length !== headers.length) {
-        throw {
-          name: "MalformattedDsvRow",
-          message:
-            `Malformatted DSV: while parsing a DSV with` +
-            ` ${headers.length} headers (${headers.join(",")}), row` +
-            ` {i} (${row.join(",")}) had wrong number of fields` +
-            ` (${row.length})!`,
-          headers: headers,
-          separator: sep,
-          row: row,
-          index: i,
-        };
-      }
-    }
-
-    return rows.map(
-      (row) => new Map(row.map((value, i) => [headers[i], value])),
-    );
-  }
-
   public static setAttributes<E extends Element = Element>(
     element: E,
     attributes: Partial<E> & Record<string, any>,
@@ -145,35 +95,6 @@ export class Utils {
     }
 
     return element;
-  }
-
-  public static createDiagonalGradient(
-    id: string,
-    startColor: string,
-    endColor: string,
-  ) {
-    const gradient = Utils.createSvgElement("linearGradient", {
-      id: id,
-      attributes: {
-        gradientTransform: "rotate(45 0.5 0.5)",
-      },
-    });
-
-    for (const [offset, stopColor] of [
-      ["0%", startColor],
-      ["50%", startColor],
-      ["50%", endColor],
-      ["100%", endColor],
-    ]) {
-      Utils.createSvgElement("stop", {
-        attributes: {
-          offset: offset,
-          ["stop-color" as keyof SVGStopElement]: stopColor,
-        },
-      });
-    }
-
-    return gradient;
   }
 
   public static fromHtml(html: string): DocumentFragment {
