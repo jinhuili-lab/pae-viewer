@@ -21,6 +21,7 @@ import {
   RegionSelection,
   RegionSelectionEvent,
 } from "./region-layer.js";
+import { SvgUtils } from "./svg-utils.js";
 
 export class PaeViewer<
   R extends Residue = Residue,
@@ -28,7 +29,9 @@ export class PaeViewer<
   C extends Crosslink<CrosslinkIndex<E>> = Crosslink<CrosslinkIndex<E>>,
 > extends EventTarget {
   private readonly _template: string = `
-<svg class="pv-graph"  xmlns="http://www.w3.org/2000/svg" overflow="visible">
+<svg class="pv-graph"
+    xmlns="http://www.w3.org/2000/svg"
+    overflow="visible">
   <style>
     :root {
       --pv-chart-color: black;
@@ -65,6 +68,12 @@ export class PaeViewer<
     text {
       font-family: Arial, Helvetica, sans-serif;
     }
+
+    .pv-region-label > text {
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+
     .pv-divider {
       stroke: var(--pv-chart-color);
       stroke-width: 0.4%;
@@ -340,7 +349,7 @@ export class PaeViewer<
 
     root.appendChild(this._element);
 
-    const rect = this._element.getBoundingClientRect();
+    const rect = root.getBoundingClientRect();
     const dim = Math.min(rect.width, rect.height);
 
     this._viewBox = { width: dim, height: dim };
@@ -402,7 +411,7 @@ export class PaeViewer<
         const otherCoord = { x: "y", y: "x" }[coord];
         const extent = Utils.toPercentage(index / total);
 
-        Utils.createSvgElement("line", {
+        SvgUtils.createSvgElement("line", {
           root: group,
           classes: ["pv-divider"],
           attributes: {
