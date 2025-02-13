@@ -75,28 +75,6 @@ export class Utils {
     }
   }
 
-  public static createSvgElement<K extends keyof SVGElementTagNameMap>(
-    name: K,
-    options?: ElementOptions<SVGElementTagNameMap[K]>,
-  ): SVGElementTagNameMap[K] {
-    const element = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      name,
-    );
-
-    options?.root?.appendChild(element);
-
-    if (options?.classes) {
-      element.classList.add(...options?.classes);
-    }
-
-    if (options?.attributes) {
-      Utils.setAttributes(element, options?.attributes);
-    }
-
-    return element;
-  }
-
   public static fromHtml(html: string): DocumentFragment {
     return document.createRange().createContextualFragment(html);
   }
@@ -129,9 +107,3 @@ export class Utils {
   }
 }
 
-export interface ElementOptions<E extends Element = Element> {
-  root?: Element;
-  id?: string;
-  classes?: string[];
-  attributes?: Partial<Record<keyof E | string, any>>;
-}
