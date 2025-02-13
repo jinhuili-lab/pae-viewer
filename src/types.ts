@@ -1,6 +1,6 @@
 export interface PaeInput<
   E extends Entity = Entity,
-  C extends Crosslink = Crosslink,
+  C extends Crosslink<CrosslinkIndex<E>> = Crosslink<CrosslinkIndex<E>>,
 > {
   pae: Pae;
   entities: E[];
@@ -9,7 +9,7 @@ export interface PaeInput<
 
 export interface PaeData<
   E extends Entity = Entity,
-  C extends Crosslink = Crosslink,
+  C extends Crosslink<CrosslinkIndex<E>> = Crosslink<CrosslinkIndex<E>>,
 > {
   pae: Pae;
   subunits: Subunit<E>[];
@@ -37,13 +37,26 @@ export interface Subunit<E extends Entity = Entity> {
   color: string;
 }
 
-export interface Crosslink<E extends Entity = Entity> {
-  source: RelativeIndex<E>;
-  target: RelativeIndex<E>;
+export interface Crosslink<T> {
+  source: T;
+  target: T;
 }
 
-export interface RelativeIndex<E extends Entity = Entity> {
-  entity: Entity;
+export interface CrosslinkIndex<E extends Entity = Entity> {
+  entityId: E['id'];
+  index: number;
+}
+
+export interface CrosslinkedResidue {
+
+}
+
+export interface RelativeIndex<
+  R extends Residue = Residue,
+  E extends Entity<R> = Entity<R>,
+> {
+  subunit: Subunit<E>;
+  residue: R;
   index: number;
 }
 
@@ -56,3 +69,13 @@ export type EntityColorScale<E extends Entity> = (
   Entity: E,
   index: number,
 ) => string;
+
+
+export type AbsoluteIndex = number;
+
+export interface IndexRange<I extends RelativeIndex | AbsoluteIndex> {
+  x1: I;
+  y1: I;
+  x2: I;
+  y2: I;
+}
