@@ -1,6 +1,7 @@
 import { Subunit } from "./types.js";
 import { Utils } from "./utils.js";
 import { StyleUtils } from "./style-utils.js";
+import { SvgUtils } from "./svg-utils.js";
 
 /**
  * A layer that displays regions between entities. Regions refer to the
@@ -99,9 +100,9 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
     totalLength: number,
     patternId?: string,
   ) {
-    const region = Utils.createSvgElement("g", { classes: ["pv-region"] });
+    const region = SvgUtils.createSvgElement("g", { classes: ["pv-region"] });
 
-    const background = Utils.createSvgElement("rect", {
+    const background = SvgUtils.createSvgElement("rect", {
       attributes: {
         x: Utils.toPercentage(subunitX.offset / totalLength),
         y: Utils.toPercentage(subunitY.offset / totalLength),
@@ -116,17 +117,13 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
 
     region.appendChild(background);
 
-    const label = Utils.createSvgElement("text", {
-      attributes: {
-        x: Utils.toPercentage(subunitX.offset + subunitX.length / 2),
-        y: Utils.toPercentage(subunitY.offset + subunitY.length / 2),
-      },
-    });
-
-    label.textContent =
-      subunitX.index === subunitY.index
-        ? (subunitX.entity.name ?? subunitX.entity.id.toString())
-        : `${subunitY.entity.id} / ${subunitY.entity.id}`;
+    const label = this._createLabel(subunitX, subunitY);
+    label.classList.add("pv-region-label");
+    Utils.setAttributes(label, {
+      x: Utils.toPercentage((subunitX.offset + subunitX.length / 2) / totalLength),
+      y: Utils.toPercentage((subunitY.offset + subunitY.length / 2) / totalLength),
+    })
+    region.appendChild(label);
 
     region.addEventListener("click", () => {
       this._select(region);
@@ -151,6 +148,38 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
     this._select(undefined);
   }
 
+  private _getSubunitName(subunit: S): string {
+    return subunit.entity.name ?? subunit.entity.id.toString();
+  }
+
+  private _createLabel(subunitX: S, subunitY: S) {
+    const textGroup = this._createLabelText(subunitX, subunitY);
+
+    textGroup.setAttribute('transform', 'translate(50%, 50%)');
+
+    return textGroup;
+  }
+
+  private _createLabelText(subunitX: S, subunitY: S): SVGGElement {
+    if (subunitX.index === subunitY.index) {
+      return SvgUtils.createMultilineText([this._getSubunitName(subunitX)]);
+    } else {
+      if (subunitX.length >= subunitY.length) {
+        // horizontal layout
+        return SvgUtils.createMultilineText([
+          `${this._getSubunitName(subunitX)} / ${this._getSubunitName(subunitY)}`,
+        ]);
+      } else {
+        // vertical layout
+        return SvgUtils.createMultilineText([
+          this._getSubunitName(subunitX),
+          "/",
+          this._getSubunitName(subunitY),
+        ]);
+      }
+    }
+  }
+
   private _createLabelBox(
     label: SVGTextElement,
     horizontalPadding = 0,
@@ -159,7 +188,7 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
   ) {
     const box = label.getBBox();
 
-    return Utils.createSvgElement("rect", {
+    return SvgUtils.createSvgElement("rect", {
       classes: ["pv-region-label-box"],
       attributes: {
         x: box.x - horizontalPadding,
