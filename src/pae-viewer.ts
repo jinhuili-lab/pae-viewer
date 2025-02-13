@@ -1,10 +1,14 @@
 import {
+  AbsoluteIndex,
   Crosslink,
+  CrosslinkIndex,
   Entity,
   EntityColorScale,
+  IndexRange,
   LinearColorScale,
   PaeData,
   PaeInput,
+  RelativeIndex,
   Residue,
   RgbColor,
   Subunit,
@@ -12,13 +16,17 @@ import {
 import { Utils } from "./utils.js";
 import { PaeUtils } from "./pae-utils.js";
 import { Style, StyleUtils } from "./style-utils.js";
-import { RegionLayer } from "./region-layer.js";
+import {
+  RegionLayer,
+  RegionSelection,
+  RegionSelectionEvent,
+} from "./region-layer.js";
 
 export class PaeViewer<
   R extends Residue = Residue,
   E extends Entity<R> = Entity<R>,
-  C extends Crosslink<E> = Crosslink<E>,
-> {
+  C extends Crosslink<CrosslinkIndex<E>> = Crosslink<CrosslinkIndex<E>>,
+> extends EventTarget {
   private readonly _template: string = `
 <svg class="pv-graph"  xmlns="http://www.w3.org/2000/svg" overflow="visible">
   <style>
@@ -144,18 +152,19 @@ export class PaeViewer<
 
   public setPae(input: PaeInput<E, C> | undefined) {
     if (input) {
-      this._paeData = this._processInput(input, this._entityColorScale);
-      this._updateImage(this._paeData.pae, this._paeColorScale);
-      this._updateEntityColors(this._paeData.subunits);
+      const processed = this._processInput(input, this._entityColorScale);
+      this._paeData = processed;
+      this._updateImage(processed.pae, this._paeColorScale);
+      this._updateEntityColors(processed.subunits);
       this._addDividers(
-        this._paeData.subunits.map((subunit) => subunit.length),
+        processed.subunits.map((subunit) => subunit.length),
         this._element.querySelector(".pv-dividers") as SVGGElement,
       );
 
-      this._regionLayer = new RegionLayer(
-        this._element.querySelector(".pv-regions") as SVGGElement,
-        this._paeData.subunits,
-      );
+      const regionGroup: SVGGElement =
+        this._element.querySelector(".pv-regions")!;
+
+      this.setupRegionLayer(regionGroup, processed);
 
       // this._addDividers(sequenceLengths);
       // this._addRegions(complex.members);
@@ -165,6 +174,72 @@ export class PaeViewer<
       this._image = undefined;
       this._element.querySelector(".pv-pae-matrix")?.setAttribute("href", "");
     }
+  }
+
+  private setupRegionLayer(
+    group: SVGGElement,
+    data: PaeData<E, C>,
+  ): RegionLayer<Subunit<E>> {
+    const layer = new RegionLayer<Subunit<E>>(group, data.subunits);
+
+    layer.addEventListener("pv-select-region", (event) => {
+      const { subunitX, subunitY } = (event as RegionSelectionEvent<Subunit<E>>)
+        .detail as RegionSelection<Subunit<E>>;
+
+      const getRelative = (
+        subunit: Subunit<E>,
+        index: number,
+      ): RelativeIndex<R, E> => ({
+        subunit: subunit,
+        residue: subunit.entity.sequence[index],
+        index: index,
+      });
+
+      const relative: IndexRange<RelativeIndex<R, E>> = {
+        x1: getRelative(subunitX, 0),
+        y1: getRelative(subunitY, 0),
+        x2: getRelative(subunitX, subunitX.length - 1),
+        y2: getRelative(subunitY, subunitY.length - 1),
+      };
+
+      const absolute = this._getAbsoluteRange(relative);
+
+      const submatrix = PaeUtils.getSubmatrix(
+        data.pae,
+        absolute.x1,
+        absolute.y1,
+        absolute.x2,
+        absolute.y2,
+      );
+
+      this.dispatchEvent(
+        new CustomEvent("pv-select-region-pae", {
+          detail: {
+            relative: relative,
+            absolute: absolute,
+            subunits: { x: subunitX, y: subunitY },
+            submatrix: submatrix,
+            mean: PaeUtils.getMean(submatrix),
+          },
+        }) satisfies PaeRegionSelectionEvent,
+      );
+    });
+
+    return layer;
+  }
+
+  private _getAbsoluteRange(
+    relative: IndexRange<RelativeIndex<R, E>>,
+  ): IndexRange<AbsoluteIndex> {
+    return Object.fromEntries(
+      (
+        ["x1", "y1", "x2", "y2"] satisfies (keyof IndexRange<AbsoluteIndex>)[]
+      ).map((key) => [key, this._getAbsoluteIndex(relative[key])]),
+    ) as any as IndexRange<AbsoluteIndex>;
+  }
+
+  private _getAbsoluteIndex(relative: RelativeIndex<R, E>): AbsoluteIndex {
+    return relative.subunit.offset + relative.index;
   }
 
   private _paeData: PaeData<E> | undefined;
@@ -220,8 +295,6 @@ export class PaeViewer<
     [235, 247, 237],
   ]);
 
-  private _regionLayer: RegionLayer<E> | undefined;
-
   public get entityColorScale(): EntityColorScale<E> {
     return this._entityColorScale;
   }
@@ -252,6 +325,7 @@ export class PaeViewer<
   ];
 
   constructor(root: HTMLElement) {
+    super();
     this._element = Utils.fromHtml(this._template).querySelector(
       ".pv-graph",
     ) as SVGSVGElement;
@@ -359,8 +433,7 @@ export class PaeViewer<
     entities: E[],
     colorScale: EntityColorScale<E>,
   ): Subunit<E>[] {
-    const total = Utils.sum(entities.map((entity) => entity.sequence.length));
-    const lengths = entities.map((entity) => entity.sequence.length / total);
+    const lengths = entities.map((entity) => entity.sequence.length);
     const offsets = [0, ...Utils.cumsum(lengths.slice(0, -1))];
 
     return entities.map((entity, i) => ({
@@ -397,4 +470,23 @@ export class PaeViewer<
       );
     }
   }
+}
+
+export type PaeSelectionEvent = CustomEvent<PaeSelectionEventDetails>;
+export type PaeRegionSelectionEvent =
+  CustomEvent<PaeRegionSelectionEventDetails>;
+
+export interface PaeSelectionEventDetails {
+  relative: IndexRange<RelativeIndex>;
+  absolute: IndexRange<AbsoluteIndex>;
+  submatrix: number[][];
+  mean: number;
+}
+
+export interface PaeRegionSelectionEventDetails<S extends Subunit = Subunit>
+  extends PaeSelectionEventDetails {
+  subunits: {
+    x: Subunit;
+    y: Subunit;
+  };
 }
