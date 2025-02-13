@@ -1,4 +1,5 @@
 import { Pae } from "./types.js";
+import { Utils } from "./utils.js";
 
 /**
  * Utility functions to determine if a given PAE value is valid
@@ -62,7 +63,7 @@ export class PaeUtils {
     return pae as Pae;
   }
 
-  public static getMax(pae: Pae): number {
+  public static getMax(pae: number[][]): number {
     let max = 0;
 
     for (const row of pae) {
@@ -74,5 +75,56 @@ export class PaeUtils {
     }
 
     return max;
+  }
+
+  /**
+   * Returns a submatrix of the given PAE matrix. The submatrix is defined by
+   * the coordinates (x1, y1) and (x2, y2) where x refers to a column index and
+   * y to a row index. The end coordinates are inclusive.
+   */
+  public static getSubmatrix(
+    pae: number[][],
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+  ): number[][] {
+    if (y2 < 0 || y2 >= pae.length) {
+      throw Error(`y2 must be in the range [0, ${pae.length}]!`);
+    }
+
+    if (y1 < 0 || y1 >= pae.length || y1 > y2) {
+      throw Error(`y1 must be in the range [0, y2 (${y2})])!`);
+    }
+
+    if (x2 < 0) {
+      throw Error("x2 must be greater than or equal to 0!");
+    }
+
+    if (x1 < 0 || x1 > x2) {
+      throw Error(`x1 must be in the range [0, x2 (${x2})]!`);
+    }
+
+    const slice = [];
+
+    for (let y = y1; y <= y2; y++) {
+      const row = pae[y];
+
+      if (x2 >= row.length) {
+        throw Error(`x2 must be in the range [0, ${row.length}]!`);
+      }
+
+      if (x1 >= row.length) {
+        throw Error(`x1 must be in the range [0, ${row.length})!`);
+      }
+
+      slice.push(row.slice(x1, x2 + 1));
+    }
+
+    return slice;
+  }
+
+  public static getMean(pae: number[][]): number {
+    return Utils.sum(pae.flat()) / (pae.length * pae[0].length);
   }
 }
