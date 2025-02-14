@@ -128,7 +128,6 @@ export class PaeViewer<
       width="100%"
       height="100%"
       style="image-rendering:pixelated"
-      href=""
     />
     <g class="pv-axes">
       <text class="pv-axis-x-label" x="50%" y="-25%" text-anchor="middle"
