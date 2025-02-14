@@ -69,20 +69,6 @@ export class PaeUtils {
     return pae as Pae;
   }
 
-  public static getMax(pae: number[][]): number {
-    let max = 0;
-
-    for (const row of pae) {
-      for (const value of row) {
-        if (value > max) {
-          max = value;
-        }
-      }
-    }
-
-    return max;
-  }
-
   /**
    * Returns a submatrix of the given PAE matrix. The submatrix is defined by
    * the coordinates (x1, y1) and (x2, y2) where x refers to a column index and

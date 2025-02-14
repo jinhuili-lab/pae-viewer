@@ -364,7 +364,7 @@ export class PaeViewer<
   ): Promise<Blob> {
     const dim = pae.length;
     const rgbaValues: number[] = new Array(dim ** 2 * 4);
-    const max = PaeUtils.getMax(pae);
+    const max = PaeUtils.MAX_PAE;
 
     for (let y = 0; y < dim; y++) {
       for (let x = 0; x < dim; x++) {
