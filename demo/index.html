@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <title>PAE Viewer Demo</title>
 
-  <script type="module">
-
-  </script>
+  <script src=" https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js "></script>
 
   <script type="module" defer>
     import { PaeViewer } from "../dist/index.js";
@@ -26,21 +24,27 @@
           { symbol: "C", name: "Cysteine" }
         ]
       },
-      {
-        id: 1,
-        sequence: [
-          { symbol: "D", name: "Aspartic acid" }
-        ]
-      }]
+        {
+          id: 1,
+          sequence: [
+            { symbol: "D", name: "Aspartic acid" }
+          ]
+        }]
     });
 
     viewer.addEventListener("pv-select-region-pae", (event) => {
-      console.log(event.detail)
+      console.log(event.detail);
+    });
+
+    document.getElementById("export-button").addEventListener("click", () => {
+      saveAs(viewer.getSvg(), "download.svg");
     });
 
   </script>
 </head>
 <body>
 <div id="pae-viewer" style="margin: 100px; width: 360px; height: 360px"></div>
+
+<button id="export-button">Export SVG</button>
 </body>
 </html>

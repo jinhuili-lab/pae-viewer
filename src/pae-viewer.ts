@@ -65,6 +65,10 @@ export class PaeViewer<
       }
     }
 
+    .pv-region {
+      opacity: 0.7;
+    }
+
     text {
       font-family: Arial, Helvetica, sans-serif;
     }
@@ -124,6 +128,7 @@ export class PaeViewer<
       width="100%"
       height="100%"
       style="image-rendering:pixelated"
+      href=""
     />
     <g class="pv-axes">
       <text class="pv-axis-x-label" x="50%" y="-25%" text-anchor="middle"
@@ -397,9 +402,7 @@ export class PaeViewer<
         return Utils.blobToBase64(this._image);
       })
       .then((base64) => {
-        this._element
-          .querySelector(".pv-pae-matrix")
-          ?.setAttribute("href", base64);
+        this._element.querySelector(".pv-pae-matrix")?.setAttribute("href", base64);
       });
   }
 
@@ -478,6 +481,45 @@ export class PaeViewer<
           `does not match the PAE matrix dimension (${data.pae.length}).`,
       );
     }
+  }
+
+  public getSvg(): Blob {
+    const svg = this._element.cloneNode(true) as SVGElement;
+
+    svg.querySelector(".pv-selections")!.remove();
+    svg.querySelector(".pv-regions")!.remove();
+
+    // workaround for clients not supporting 'dominant-baseline',
+    // e.g. Office applications (Word, PowerPoint)
+    for (const text of svg.querySelectorAll(
+      "text[dominant-baseline=central]",
+    )) {
+      const relativeY =
+        parseFloat(text.getAttribute("y") ?? getComputedStyle(text).y) / 100;
+      text.removeAttribute("dominant-baseline");
+      text.setAttribute("y", (relativeY * this._viewBox.height + 5).toString());
+    }
+
+    const pad = { left: 25, right: 25, top: 25, bottom: 25 };
+    const bbox = this._element.getBBox();
+    const width = bbox.width + pad.left + pad.right;
+    const height = bbox.height + pad.top + pad.bottom;
+
+    const outerSvg = svg.cloneNode(false) as SVGElement;
+    outerSvg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    outerSvg.setAttribute("width", width.toString());
+    outerSvg.setAttribute("height", height.toString());
+
+    const container = SvgUtils.createSvgElement("g", {
+      attributes: {
+        transform: `translate(${-bbox.x + pad.left}, ${-bbox.y + pad.top})`,
+      },
+    });
+
+    container.appendChild(svg);
+    outerSvg.appendChild(container);
+
+    return SvgUtils.getBlob(outerSvg);
   }
 }
 

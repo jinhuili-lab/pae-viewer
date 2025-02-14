@@ -41,7 +41,7 @@ export class SvgUtils {
         return SvgUtils.createSvgElement("text", {
           attributes: {
             x: 0,
-            y: `${i * verticalGapFactor - (lines.length - 1) * verticalGapFactor / 2 }em`,
+            y: `${i * verticalGapFactor - ((lines.length - 1) * verticalGapFactor) / 2}em`,
           },
           textContent: line,
           ...options,
@@ -50,6 +50,12 @@ export class SvgUtils {
     );
 
     return group;
+  }
+
+  public static getBlob(element: SVGElement): Blob {
+    return new Blob([element.outerHTML], {
+      type: "image/svg+xml;charset=utf-8",
+    });
   }
 }
 
