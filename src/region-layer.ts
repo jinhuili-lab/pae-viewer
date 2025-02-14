@@ -117,12 +117,7 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
 
     region.appendChild(background);
 
-    const label = this._createLabel(subunitX, subunitY);
-    label.classList.add("pv-region-label");
-    Utils.setAttributes(label, {
-      x: Utils.toPercentage((subunitX.offset + subunitX.length / 2) / totalLength),
-      y: Utils.toPercentage((subunitY.offset + subunitY.length / 2) / totalLength),
-    })
+    const label = this._createLabel(subunitX, subunitY, totalLength);
     region.appendChild(label);
 
     region.addEventListener("click", () => {
@@ -152,12 +147,16 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
     return subunit.entity.name ?? subunit.entity.id.toString();
   }
 
-  private _createLabel(subunitX: S, subunitY: S) {
-    const textGroup = this._createLabelText(subunitX, subunitY);
+  private _createLabel(subunitX: S, subunitY: S, totalLength: number) {
+    const label = this._createLabelText(subunitX, subunitY);
 
-    textGroup.setAttribute('transform', 'translate(50%, 50%)');
+    label.classList.add("pv-region-label");
+    Utils.setAttributes(label, {
+      x: Utils.toPercentage((subunitX.offset + subunitX.length / 2) / totalLength),
+      y: Utils.toPercentage((subunitY.offset + subunitY.length / 2) / totalLength),
+    })
 
-    return textGroup;
+    return label;
   }
 
   private _createLabelText(subunitX: S, subunitY: S): SVGGElement {
