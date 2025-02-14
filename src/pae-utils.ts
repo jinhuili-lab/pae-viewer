@@ -3,9 +3,11 @@ import { Utils } from "./utils.js";
 
 /**
  * Utility functions to determine if a given PAE value is valid
- * (N * N matrix of numbers >= 0 with N > 0).
+ * (N * N matrix of numbers in [0, 31.75] with N > 0)
  */
 export class PaeUtils {
+  public static readonly MAX_PAE = 31.75;
+
   /** Returns true if PAE value is valid, otherwise false. */
   public static isValid(pae: any): pae is Pae {
     try {
@@ -50,10 +52,14 @@ export class PaeUtils {
       }
 
       for (const [columnIndex, value] of row.entries()) {
-        if (!(typeof value === "number" && !isNaN(value)) || value < 0) {
+        if (
+          !(typeof value === "number" && !isNaN(value)) ||
+          value < 0 ||
+          value > PaeUtils.MAX_PAE
+        ) {
           throw Error(
-            `The PAE values must be numbers >= 0, but column ` +
-              ` ${columnIndex} in row ${rowIndex} contained` +
+            `The PAE values must be numbers in [0, ${PaeUtils.MAX_PAE}],` +
+              ` but column ${columnIndex} in row ${rowIndex} contained` +
               ` '${JSON.stringify(value)}'!`,
           );
         }
