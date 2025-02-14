@@ -15,7 +15,7 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
       <defs>
         <pattern id="pv-stripes-template" patternUnits="userSpaceOnUse"
                  width="2%" height="2%" patternTransform="rotate(45)">
-          <rect x="0" y="0"></rect>
+          <rect x="0" y="0" width="2%" height="2%"></rect>
           <line x1="0" y1="0" x2="0" y2="2%" stroke-width="2%" />
         </pattern>
       </defs>
@@ -45,7 +45,6 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
     subunits: S[],
     template: SVGPatternElement,
   ): PatternMap {
-    const ids = subunits.map((subunit) => subunit.entity.id);
     const patterns: PatternMap = new Map();
 
     // create stripe patterns for individual regions
@@ -152,9 +151,13 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
 
     label.classList.add("pv-region-label");
     Utils.setAttributes(label, {
-      x: Utils.toPercentage((subunitX.offset + subunitX.length / 2) / totalLength),
-      y: Utils.toPercentage((subunitY.offset + subunitY.length / 2) / totalLength),
-    })
+      x: Utils.toPercentage(
+        (subunitX.offset + subunitX.length / 2) / totalLength,
+      ),
+      y: Utils.toPercentage(
+        (subunitY.offset + subunitY.length / 2) / totalLength,
+      ),
+    });
 
     return label;
   }
@@ -177,6 +180,10 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
         ]);
       }
     }
+  }
+
+  public show(show: boolean) {
+    this._root.style.visibility = show ? "visible" : "hidden";
   }
 
   private _createLabelBox(

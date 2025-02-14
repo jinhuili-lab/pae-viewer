@@ -41,7 +41,6 @@ export class PaeViewer<
       --pv-marker-outline-color: white;
       --pv-marker-outline-thickness: 0.2%;
       --pv-marker-size: 1%;
-      --pv-stripe-width: 2%;
       --pv-color-x: cyan;
       --pv-color-y: orange;
       --pv-color-overlap: magenta;
@@ -50,19 +49,6 @@ export class PaeViewer<
     .pv-axes > line {
       color: var(--pv-chart-color);
       stroke-width: var(--pv-chart-line-thickness);
-    }
-
-    .pv-regions {
-      pattern, pattern > rect {
-          width: var(--pv-stripe-width);
-          height: var(--pv-stripe-width);
-        }
-      }
-
-      pattern > line {
-        y2: var(--pv-stripe-width);
-        stroke-width: var(--pv-stripe-width);
-      }
     }
 
     .pv-region {
@@ -114,12 +100,6 @@ export class PaeViewer<
       <stop offset="50%" stop-color="var(--pv-color-x)" />
       <stop offset="100%" stop-color="var(--pv-color-x)" />
     </linearGradient>
-    <pattern id="stripes-template" patternUnits="userSpaceOnUse"
-             width="2%" height="2%" patternTransform="rotate(45)">
-      <rect x="0" y="0" width="2%" height="2%" fill="red"></rect>
-      <line x1="0" y1="0" x2="0" y2="2%"
-            stroke="#00FF00" stroke-width="2%" />
-    </pattern>
   </defs>
 
   <g class="pv-graph-area">
@@ -159,6 +139,8 @@ export class PaeViewer<
 </svg>
 `;
 
+  private _regionLayer: RegionLayer<Subunit<E>> | undefined;
+
   public getPaeData(): PaeData | undefined {
     return this._paeData;
   }
@@ -177,7 +159,7 @@ export class PaeViewer<
       const regionGroup: SVGGElement =
         this._element.querySelector(".pv-regions")!;
 
-      this.setupRegionLayer(regionGroup, processed);
+      this._regionLayer = this.setupRegionLayer(regionGroup, processed);
 
       // this._addDividers(sequenceLengths);
       // this._addRegions(complex.members);
@@ -519,6 +501,10 @@ export class PaeViewer<
     outerSvg.appendChild(container);
 
     return SvgUtils.getBlob(outerSvg);
+  }
+
+  public showRegions(show: boolean) {
+    this._regionLayer?.show(show);
   }
 }
 

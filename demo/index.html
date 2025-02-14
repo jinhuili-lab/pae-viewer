@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>PAE Viewer Demo</title>
 
-  <script src=" https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js "></script>
+  <script
+    src=" https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js "></script>
 
   <script type="module" defer>
     import { PaeViewer } from "../dist/index.js";
@@ -38,6 +39,20 @@
 
     document.getElementById("export-button").addEventListener("click", () => {
       saveAs(viewer.getSvg(), "download.svg");
+    });
+
+    const toggleRegionKey = "Shift";
+
+    document.addEventListener("keydown", event => {
+      if (event.key === toggleRegionKey) {
+        viewer.showRegions(true);
+      }
+    });
+
+    document.addEventListener("keyup", event => {
+      if (event.key === toggleRegionKey) {
+        viewer.showRegions(false);
+      }
     });
 
   </script>
