@@ -28,6 +28,7 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
 
   public constructor(root: SVGGElement, subunits: S[]) {
     super();
+    console.log(root.getBBox());
     this._root = root;
     this._root.replaceChildren();
 
@@ -38,7 +39,9 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
 
     this._defs.append(...patterns.values());
     this._root.appendChild(this._defs);
-    this._root.append(...this._createRegions(subunits, patterns));
+
+    this._addRegions(this._root, subunits, patterns);
+    this.show(false);
   }
 
   private _createPatterns(
@@ -79,12 +82,17 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
     return [subunit1.index, subunit2.index].sort().join("-");
   }
 
-  private _createRegions(subunits: S[], patterns: PatternMap): SVGGElement[] {
+  private _addRegions(
+    root: SVGElement,
+    subunits: S[],
+    patterns: PatternMap,
+  ): SVGGElement[] {
     const total = Utils.sum(subunits.map((subunit) => subunit.length));
 
     return Array.from(Utils.cartesian(subunits, subunits)).map(
       ([subunitX, subunitY]) =>
-        this._createRegion(
+        this._addRegion(
+          root,
           subunitX,
           subunitY,
           total,
@@ -93,7 +101,8 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
     );
   }
 
-  private _createRegion(
+  private _addRegion(
+    root: SVGElement,
     subunitX: S,
     subunitY: S,
     totalLength: number,
@@ -101,6 +110,7 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
   ) {
     const region = SvgUtils.createSvgElement("g", { classes: ["pv-region"] });
 
+    console.log(subunitX.index, subunitY.index);
     const background = SvgUtils.createSvgElement("rect", {
       attributes: {
         x: Utils.toPercentage(subunitX.offset / totalLength),
@@ -116,8 +126,11 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
 
     region.appendChild(background);
 
-    const label = this._createLabel(subunitX, subunitY, totalLength);
-    region.appendChild(label);
+    // needs to be added to the root element for `getBBox` for label background
+    // to work
+    root.appendChild(region);
+
+    this._addLabel(region, subunitX, subunitY, totalLength);
 
     region.addEventListener("click", () => {
       this._select(region);
@@ -146,7 +159,12 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
     return subunit.entity.name ?? subunit.entity.id.toString();
   }
 
-  private _createLabel(subunitX: S, subunitY: S, totalLength: number) {
+  private _addLabel(
+    root: SVGElement,
+    subunitX: S,
+    subunitY: S,
+    totalLength: number,
+  ) {
     const label = this._createLabelText(subunitX, subunitY);
 
     label.classList.add("pv-region-label");
@@ -158,6 +176,15 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
         (subunitY.offset + subunitY.length / 2) / totalLength,
       ),
     });
+
+    root.appendChild(label);
+    label.prepend(
+      SvgUtils.createBox(
+        SvgUtils.getCombinedBox(...(label.children as any as SVGTextElement[])),
+        0,
+        { classes: ["pv-background-box"] },
+      ),
+    );
 
     return label;
   }

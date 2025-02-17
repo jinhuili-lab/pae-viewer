@@ -36,7 +36,7 @@ export class PaeViewer<
     :root {
       --pv-chart-color: black;
       --pv-chart-line-thickness: 0.2%;
-      --pv-font-size: 0.04;
+      --pv-font-size: 0.95em;
       --pv-selection-outline-color: white;
       --pv-marker-outline-color: white;
       --pv-marker-outline-thickness: 0.2%;
@@ -44,6 +44,7 @@ export class PaeViewer<
       --pv-color-x: cyan;
       --pv-color-y: orange;
       --pv-color-overlap: magenta;
+      font-size: var(--pv-font-size);
     }
 
     .pv-axes > line {
@@ -53,6 +54,12 @@ export class PaeViewer<
 
     .pv-region {
       opacity: 0.7;
+    }
+
+    .pv-background-box {
+      rx: 1%;
+      opacity: 0.8;
+      fill: white;
     }
 
     text {
