@@ -28,7 +28,6 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
 
   public constructor(root: SVGGElement, subunits: S[]) {
     super();
-    console.log(root.getBBox());
     this._root = root;
     this._root.replaceChildren();
 
@@ -110,7 +109,6 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
   ) {
     const region = SvgUtils.createSvgElement("g", { classes: ["pv-region"] });
 
-    console.log(subunitX.index, subunitY.index);
     const background = SvgUtils.createSvgElement("rect", {
       attributes: {
         x: Utils.toPercentage(subunitX.offset / totalLength),

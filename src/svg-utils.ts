@@ -91,12 +91,8 @@ export class SvgUtils {
     padding: number | Partial<Bounds> = 0,
     options: ElementOptions<SVGRectElement> = {},
   ): SVGRectElement {
-    console.log("background for", element.getBBox());
-
     const background = SvgUtils.createBox(element.getBBox(), padding, options);
     root.insertBefore(background, element);
-
-
     return background;
   }
 
