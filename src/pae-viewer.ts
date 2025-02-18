@@ -22,6 +22,7 @@ import {
   RegionSelectionEvent,
 } from "./region-layer.js";
 import { SvgUtils } from "./svg-utils.js";
+import { SelectionLayer } from "./selection-layer.js";
 
 export class PaeViewer<
   R extends Residue = Residue,
@@ -78,37 +79,6 @@ export class PaeViewer<
   </style>
   <style data-id="entity-colors"></style>
   <style data-id="overrides"></style>
-  <defs>
-    <linearGradient id="rangeMarkerLower"
-                    gradientTransform="rotate(45 0.5 0.5)">
-      <stop offset="0%" stop-color="var(--pv-color-x)" />
-      <stop offset="50%" stop-color="var(--pv-color-x)" />
-      <stop offset="50%" stop-color="magenta" />
-      <stop offset="100%" stop-color="magenta" />
-    </linearGradient>
-    <linearGradient id="rangeMarkerLowerReversed"
-                    gradientTransform="rotate(45 0.5 0.5)">
-      <stop offset="0%" stop-color="orange" />
-      <stop offset="50%" stop-color="orange" />
-      <stop offset="50%" stop-color="var(--pv-color-overlap)" />
-      <stop offset="100%" stop-color="var(--pv-color-overlap)" />
-    </linearGradient>
-    <linearGradient id="rangeMarkerUpper"
-                    gradientTransform="rotate(45 0.5 0.5)">
-      <stop offset="0%" stop-color="var(--pv-color-overlap)" />
-      <stop offset="50%" stop-color="var(--pv-color-overlap)" />
-      <stop offset="50%" stop-color="orange" />
-      <stop offset="100%" stop-color="orange" />
-    </linearGradient>
-    <linearGradient id="rangeMarkerUpperReversed"
-                    gradientTransform="rotate(45 0.5 0.5)">
-      <stop offset="0%" stop-color="var(--pv-color-overlap)" />
-      <stop offset="50%" stop-color="var(--pv-color-overlap)" />
-      <stop offset="50%" stop-color="var(--pv-color-x)" />
-      <stop offset="100%" stop-color="var(--pv-color-x)" />
-    </linearGradient>
-  </defs>
-
   <g class="pv-graph-area">
     <image
       class="pv-pae-matrix"
@@ -136,8 +106,6 @@ export class PaeViewer<
     </g>
     <g class="pv-dividers"></g>
     <g class="pv-interactive-layer">
-      <rect class="pv-backdrop" x="0" y="0"
-            width="100%" height="100%" opacity="0" />
       <g class="pv-selections"></g>
       <g class="pv-crosslinks"></g>
       <g class="pv-regions"></g>
@@ -163,10 +131,13 @@ export class PaeViewer<
         this._element.querySelector(".pv-dividers") as SVGGElement,
       );
 
-      const regionGroup: SVGGElement =
-        this._element.querySelector(".pv-regions")!;
 
-      this._regionLayer = this.setupRegionLayer(regionGroup, processed);
+      this._setupSelectionLayer(
+        this._element.querySelector(".pv-selections")!,
+        this._element.querySelector(".pv-pae-matrix")!,
+        processed
+      )
+      this._regionLayer = this.setupRegionLayer(this._element.querySelector(".pv-regions")!, processed);
 
       // this._addDividers(sequenceLengths);
       // this._addRegions(complex.members);
@@ -176,6 +147,30 @@ export class PaeViewer<
       this._image = undefined;
       this._element.querySelector(".pv-pae-matrix")?.setAttribute("href", "");
     }
+  }
+
+  private _setupSelectionLayer(
+    group: SVGGElement,
+    matrix: SVGImageElement,
+    data: PaeData<E, C>,
+  ): SelectionLayer<Subunit<E>> {
+    const layer = new SelectionLayer<Subunit<E>>(group, matrix, data.subunits);
+
+    // layer.addEventListener("pv-select-region", (event) => {
+    //   this.dispatchEvent(
+    //     new CustomEvent("pv-select-region-pae", {
+    //       detail: {
+    //         relative: relative,
+    //         absolute: absolute,
+    //         subunits: { x: subunitX, y: subunitY },
+    //         submatrix: submatrix,
+    //         mean: PaeUtils.getMean(submatrix),
+    //       },
+    //     }) satisfies PaeRegionSelectionEvent,
+    //   );
+    // });
+
+    return layer;
   }
 
   private setupRegionLayer(

@@ -1,4 +1,4 @@
-import { LinearColorScale, RgbColor } from "./types";
+import { LinearColorScale, Position, RgbColor } from "./types";
 
 export class Utils {
   public static setAttributes<E extends Element = Element>(
@@ -105,5 +105,16 @@ export class Utils {
       ];
     };
   }
-}
 
+  public static getRelativeMousePosition(
+    event: MouseEvent,
+    clamped: boolean = true,
+  ): Position {
+    const rect = (event.target as Element).getBoundingClientRect();
+
+    return {
+      x: (event.clientX - rect.left) / (rect.right - rect.left),
+      y: (event.clientY - rect.top) / (rect.bottom - rect.top),
+    };
+  }
+}
