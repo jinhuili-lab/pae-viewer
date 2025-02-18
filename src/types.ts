@@ -80,7 +80,7 @@ export interface IndexRange<I extends RelativeIndex | AbsoluteIndex> {
   y2: I;
 }
 
-export interface Position {
+export interface Point {
   x: number;
   y: number;
 }

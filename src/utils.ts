@@ -1,4 +1,4 @@
-import { LinearColorScale, Position, RgbColor } from "./types";
+import { LinearColorScale, Point, RgbColor } from "./types";
 
 export class Utils {
   public static setAttributes<E extends Element = Element>(
@@ -106,15 +106,23 @@ export class Utils {
     };
   }
 
-  public static getRelativeMousePosition(
-    event: MouseEvent,
-    clamped: boolean = true,
-  ): Position {
-    const rect = (event.target as Element).getBoundingClientRect();
+  public static getRelativeMousePosition(event: MouseEvent): Point {
+    return Utils.getMousePositionRelativeTo(event, (event.target as Element));
+  }
+
+  public static getMousePositionRelativeTo(event: MouseEvent, element: Element): Point {
+    const rect = element.getBoundingClientRect();
 
     return {
       x: (event.clientX - rect.left) / (rect.right - rect.left),
       y: (event.clientY - rect.top) / (rect.bottom - rect.top),
     };
+  }
+
+  public static createEvent<E extends CustomEvent>(
+    type: string,
+    detail: E["detail"],
+  ): CustomEvent<E["detail"]> {
+    return new CustomEvent<E["detail"]>(type, { detail });
   }
 }

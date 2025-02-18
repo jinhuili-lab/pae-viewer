@@ -1,10 +1,14 @@
-import { Subunit } from "./types.js";
+import { Point } from "./types.js";
 import { Utils } from "./utils.js";
 
 /**
- * Handles selections of areas of the PAE matrix.
+ * Handles selections of points and areas of the PAE matrix by processing
+ * mouse interactions and dispatching corresponding events, as well as
+ * displaying selection markers. It uses relative coordinates [0, 1], receiving
+ * mouse events from the `matrix` element and rendering markers on the
+ * `root` layer element.
  */
-export class SelectionLayer<S extends Subunit = Subunit> extends EventTarget {
+export class SelectionLayer extends EventTarget {
   private readonly _defs: SVGDefsElement = Utils.fromHtml(
     `
     <defs>
@@ -42,11 +46,7 @@ export class SelectionLayer<S extends Subunit = Subunit> extends EventTarget {
 
   private readonly _root: SVGGElement;
 
-  public constructor(
-    root: SVGGElement,
-    matrix: SVGImageElement,
-    subunits: S[],
-  ) {
+  public constructor(root: SVGGElement, matrix: SVGImageElement) {
     super();
     this._root = root;
     this._root.replaceChildren();
@@ -54,10 +54,81 @@ export class SelectionLayer<S extends Subunit = Subunit> extends EventTarget {
     this._setupListeners(matrix);
   }
 
-  private _setupListeners(target: SVGImageElement) {
-    target.addEventListener("mousedown", (event: MouseEvent) => {
-      event.stopPropagation();
+  private _setupListeners(matrix: SVGImageElement) {
+    let start: Point | null = null;
+    let selectingArea: boolean = false;
+
+    matrix.addEventListener("mousedown", (event: MouseEvent) => {
       event.preventDefault();
+      event.stopPropagation();
+
+      start = Utils.getRelativeMousePosition(event);
+    });
+
+    matrix.addEventListener("mouseup", (event: MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (start) {
+        if (selectingArea) {
+          this.dispatchEvent(
+            Utils.createEvent<SelectAreaEvent>("select-area", {
+              start: start,
+              end: Utils.getRelativeMousePosition(event),
+            }),
+          );
+        } else {
+          this.dispatchEvent(
+            Utils.createEvent<SelectPointEvent>("select-point", start),
+          );
+        }
+      }
+
+      start = null;
+      selectingArea = false;
+    });
+
+    matrix.addEventListener("mousemove", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (start) {
+        selectingArea = true;
+
+        this.dispatchEvent(
+          Utils.createEvent<SelectingAreaEvent>("selecting-area", {
+            start: start,
+            end: Utils.getRelativeMousePosition(event),
+          }),
+        );
+      } else {
+        this.dispatchEvent(
+          Utils.createEvent<MoveCursorEvent>(
+            "move-cursor",
+            Utils.getRelativeMousePosition(event),
+          ),
+        );
+      }
+    });
+
+    // reset selection for mouse
+    document.addEventListener("mouseup", (event) => {
+      if (start && selectingArea) {
+        const { x, y } = Utils.getMousePositionRelativeTo(event, matrix);
+
+        this.dispatchEvent(
+          Utils.createEvent<SelectAreaEvent>("select-area", {
+            start: start,
+            end: {
+              x: Utils.clamp(x, 0, 1),
+              y: Utils.clamp(y, 0, 1),
+            },
+          }),
+        );
+      }
+
+      start = null;
+      selectingArea = false;
     });
   }
 
@@ -547,4 +618,14 @@ export class SelectionLayer<S extends Subunit = Subunit> extends EventTarget {
   //     this.#statusSelection.append("; ", paeDisplay);
   //   }
   // }
+}
+
+export type MoveCursorEvent = CustomEvent<Point>;
+export type SelectPointEvent = CustomEvent<Point>;
+export type SelectAreaEvent = CustomEvent<AreaSelection>;
+export type SelectingAreaEvent = CustomEvent<AreaSelection>;
+
+export interface AreaSelection {
+  start: Point;
+  end: Point;
 }

@@ -22,7 +22,11 @@ import {
   RegionSelectionEvent,
 } from "./region-layer.js";
 import { SvgUtils } from "./svg-utils.js";
-import { SelectionLayer } from "./selection-layer.js";
+import {
+  MoveCursorEvent, SelectAreaEvent, SelectingAreaEvent,
+  SelectionLayer,
+  SelectPointEvent
+} from "./selection-layer.js";
 
 export class PaeViewer<
   R extends Residue = Residue,
@@ -67,9 +71,17 @@ export class PaeViewer<
       font-family: Arial, Helvetica, sans-serif;
     }
 
+    .pv-pae-matrix {
+      cursor: crosshair;
+    }
+
     .pv-region-label > text {
       text-anchor: middle;
       dominant-baseline: middle;
+    }
+
+    .pv-dividers {
+      pointer-events: none;
     }
 
     .pv-divider {
@@ -135,7 +147,6 @@ export class PaeViewer<
       this._setupSelectionLayer(
         this._element.querySelector(".pv-selections")!,
         this._element.querySelector(".pv-pae-matrix")!,
-        processed
       )
       this._regionLayer = this.setupRegionLayer(this._element.querySelector(".pv-regions")!, processed);
 
@@ -151,24 +162,25 @@ export class PaeViewer<
 
   private _setupSelectionLayer(
     group: SVGGElement,
-    matrix: SVGImageElement,
-    data: PaeData<E, C>,
-  ): SelectionLayer<Subunit<E>> {
-    const layer = new SelectionLayer<Subunit<E>>(group, matrix, data.subunits);
+    matrix: SVGImageElement
+  ): SelectionLayer {
+    const layer = new SelectionLayer(group, matrix);
 
-    // layer.addEventListener("pv-select-region", (event) => {
-    //   this.dispatchEvent(
-    //     new CustomEvent("pv-select-region-pae", {
-    //       detail: {
-    //         relative: relative,
-    //         absolute: absolute,
-    //         subunits: { x: subunitX, y: subunitY },
-    //         submatrix: submatrix,
-    //         mean: PaeUtils.getMean(submatrix),
-    //       },
-    //     }) satisfies PaeRegionSelectionEvent,
-    //   );
-    // });
+    layer.addEventListener("move-cursor", (event) => {
+      console.log(event.type, (event as MoveCursorEvent).detail);
+    });
+
+    layer.addEventListener("select-point", (event) => {
+      console.log(event.type, (event as SelectPointEvent).detail);
+    });
+
+    layer.addEventListener("selecting-area", (event) => {
+      console.log(event.type, (event as SelectingAreaEvent).detail);
+    });
+
+    layer.addEventListener("select-area", (event) => {
+      console.log(event.type, (event as SelectAreaEvent).detail);
+    });
 
     return layer;
   }
