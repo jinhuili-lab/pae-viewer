@@ -72,7 +72,7 @@ export class IndexUtils {
     const subunit = subunits.find(
       (subunit) =>
         subunit.offset <= absolute &&
-        subunit.offset + length > subunit.offset + subunit.length,
+        subunit.offset + subunit.length > absolute,
     )!;
     const index = absolute - subunit.offset;
 
