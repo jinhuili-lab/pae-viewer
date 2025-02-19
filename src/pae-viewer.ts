@@ -6,8 +6,10 @@ import {
   EntityColorScale,
   IndexRange,
   LinearColorScale,
+  Pae,
   PaeData,
   PaeInput,
+  Point,
   RelativeIndex,
   Residue,
   RgbColor,
@@ -23,10 +25,13 @@ import {
 } from "./region-layer.js";
 import { SvgUtils } from "./svg-utils.js";
 import {
-  MoveCursorEvent, SelectAreaEvent, SelectingAreaEvent,
+  MoveCursorEvent,
+  SelectAreaEvent,
+  SelectingAreaEvent,
   SelectionLayer,
-  SelectPointEvent
+  SelectPointEvent,
 } from "./selection-layer.js";
+import { IndexUtils } from "./index-utils.js";
 
 export class PaeViewer<
   R extends Residue = Residue,
@@ -143,12 +148,15 @@ export class PaeViewer<
         this._element.querySelector(".pv-dividers") as SVGGElement,
       );
 
-
       this._setupSelectionLayer(
         this._element.querySelector(".pv-selections")!,
         this._element.querySelector(".pv-pae-matrix")!,
-      )
-      this._regionLayer = this.setupRegionLayer(this._element.querySelector(".pv-regions")!, processed);
+        processed,
+      );
+      this._regionLayer = this.setupRegionLayer(
+        this._element.querySelector(".pv-regions")!,
+        processed,
+      );
 
       // this._addDividers(sequenceLengths);
       // this._addRegions(complex.members);
@@ -162,12 +170,22 @@ export class PaeViewer<
 
   private _setupSelectionLayer(
     group: SVGGElement,
-    matrix: SVGImageElement
+    matrix: SVGImageElement,
+    data: PaeData<E, C>,
   ): SelectionLayer {
     const layer = new SelectionLayer(group, matrix);
 
     layer.addEventListener("move-cursor", (event) => {
-      console.log(event.type, (event as MoveCursorEvent).detail);
+      this.dispatchEvent(
+        Utils.createEvent<PaeSelectionEvent>(
+          "pv-move-cursor",
+          this._getSelectionFromPoint(
+            data.pae,
+            data.subunits,
+            (event as MoveCursorEvent).detail,
+          ),
+        ),
+      );
     });
 
     layer.addEventListener("select-point", (event) => {
@@ -211,7 +229,7 @@ export class PaeViewer<
         y2: getRelative(subunitY, subunitY.length - 1),
       };
 
-      const absolute = this._getAbsoluteRange(relative);
+      const absolute = IndexUtils.getAbsoluteRange(relative);
 
       const submatrix = PaeUtils.getSubmatrix(
         data.pae,
@@ -222,33 +240,17 @@ export class PaeViewer<
       );
 
       this.dispatchEvent(
-        new CustomEvent("pv-select-region-pae", {
-          detail: {
-            relative: relative,
-            absolute: absolute,
-            subunits: { x: subunitX, y: subunitY },
-            submatrix: submatrix,
-            mean: PaeUtils.getMean(submatrix),
-          },
-        }) satisfies PaeRegionSelectionEvent,
+        Utils.createEvent<PaeRegionSelectionEvent>("pv-select-region-pae", {
+          relative: relative,
+          absolute: absolute,
+          subunits: { x: subunitX, y: subunitY },
+          submatrix: submatrix,
+          mean: PaeUtils.getMean(submatrix),
+        }),
       );
     });
 
     return layer;
-  }
-
-  private _getAbsoluteRange(
-    relative: IndexRange<RelativeIndex<R, E>>,
-  ): IndexRange<AbsoluteIndex> {
-    return Object.fromEntries(
-      (
-        ["x1", "y1", "x2", "y2"] satisfies (keyof IndexRange<AbsoluteIndex>)[]
-      ).map((key) => [key, this._getAbsoluteIndex(relative[key])]),
-    ) as any as IndexRange<AbsoluteIndex>;
-  }
-
-  private _getAbsoluteIndex(relative: RelativeIndex<R, E>): AbsoluteIndex {
-    return relative.subunit.offset + relative.index;
   }
 
   private _paeData: PaeData<E> | undefined;
@@ -397,7 +399,9 @@ export class PaeViewer<
         return Utils.blobToBase64(this._image);
       })
       .then((base64) => {
-        this._element.querySelector(".pv-pae-matrix")?.setAttribute("href", base64);
+        this._element
+          .querySelector(".pv-pae-matrix")
+          ?.setAttribute("href", base64);
       });
   }
 
@@ -520,21 +524,62 @@ export class PaeViewer<
   public showRegions(show: boolean) {
     this._regionLayer?.show(show);
   }
+
+  private _getSelectionFromPoint(
+    pae: Pae,
+    subunits: Subunit<E>[],
+    point: Point,
+  ) {
+    const total = Utils.sum(subunits.map((subunit) => subunit.length));
+    const absolute = IndexUtils.getAbsoluteRangeFromPoint(total, point);
+    const value = pae[absolute.y1][absolute.x1];
+
+    return {
+      relative: IndexUtils.getRelativeRange(absolute, subunits),
+      absolute: absolute,
+      submatrix: [[value]],
+      mean: value,
+    };
+  }
+
+  private _getSelectionFromPoints(
+    pae: Pae,
+    subunits: Subunit<E>[],
+    start: Point,
+    end: Point,
+  ) {
+    const total = Utils.sum(subunits.map((subunit) => subunit.length));
+    const absolute = IndexUtils.getAbsoluteRangeFromPoints(total, start, end);
+
+    const submatrix = PaeUtils.getSubmatrix(
+      pae,
+      absolute.x1,
+      absolute.y1,
+      absolute.x2,
+      absolute.y2,
+    );
+
+    return {
+      relative: IndexUtils.getRelativeRange(absolute, subunits),
+      absolute: absolute,
+      submatrix: submatrix,
+      mean: PaeUtils.getMean(submatrix),
+    };
+  }
 }
 
-export type PaeSelectionEvent = CustomEvent<PaeSelectionEventDetails>;
+export type PaeSelectionEvent = CustomEvent<PaeSelection>;
 export type PaeRegionSelectionEvent =
   CustomEvent<PaeRegionSelectionEventDetails>;
 
-export interface PaeSelectionEventDetails {
+export interface PaeSelection {
   relative: IndexRange<RelativeIndex>;
   absolute: IndexRange<AbsoluteIndex>;
   submatrix: number[][];
   mean: number;
 }
 
-export interface PaeRegionSelectionEventDetails<S extends Subunit = Subunit>
-  extends PaeSelectionEventDetails {
+export interface PaeRegionSelectionEventDetails extends PaeSelection {
   subunits: {
     x: Subunit;
     y: Subunit;

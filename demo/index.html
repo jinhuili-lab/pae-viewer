@@ -37,6 +37,10 @@
       console.log(event.detail);
     });
 
+    viewer.addEventListener("pv-move-cursor", (event) => {
+      console.log(event.detail);
+    });
+
     document.getElementById("export-button").addEventListener("click", () => {
       saveAs(viewer.getSvg(), "download.svg");
     });
