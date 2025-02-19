@@ -42,7 +42,7 @@
     }
 
     function stringifyRange(r1, r2) {
-      return `${stringifyRelativeIndex(r1)} - ${stringifyRelativeIndex(r1)}`;
+      return `${stringifyIndex(r1)} - ${stringifyIndex(r2)}`;
     }
 
     function stringifySelectedRange(selection, coord) {
@@ -60,8 +60,21 @@
       );
     }
 
+    const getSubunitName = (s) => s.entity.name ?? s.entity.id;
+
     viewer.addEventListener("pv-select-region-pae", (event) => {
-      console.log(event.detail);
+      let info = "";
+
+      if (event.detail.subunits.x.index === event.detail.subunits.x.index === event.detail.subunits.y.index) {
+        info = getSubunitName(event.detail.subunits.x);
+      } else {
+        info = (
+          `${getSubunitName(event.detail.subunits.x)}`
+          + ` / ${getSubunitName(event.detail.subunits.y)}`
+        );
+      }
+
+      selectionInfo.innerText = info + `; mean PAE: ${event.detail.mean}`;
     });
 
     viewer.addEventListener("pv-move-cursor", (event) => {
