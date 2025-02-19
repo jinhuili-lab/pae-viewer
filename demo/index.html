@@ -20,25 +20,56 @@
     viewer.setPae({
       pae: [[0, 1, 2], [3, 4, 5], [7, 8, 9]],
       entities: [{
-        id: 0, sequence: [
+        id: 0, name: "PdhA", sequence: [
           { symbol: "A", name: "Arginine" },
           { symbol: "C", name: "Cysteine" }
         ]
       },
         {
-          id: 1,
+          id: 1, name: "PdhB",
           sequence: [
             { symbol: "D", name: "Aspartic acid" }
           ]
         }]
     });
 
+    const cursorInfo = document.getElementById("cursor-info");
+    const selectionInfo = document.getElementById("selection-info");
+    const selectionIsPoint = p => p.absolute.x1 === p.absolute.x2 && p.absolute.y1 === p.absolute.y2;
+
+    function stringifyIndex(relative) {
+      return `${relative.residue.name ?? relative.residue.symbol} ${relative.index + 1}`;
+    }
+
+    function stringifyRange(r1, r2) {
+      return `${stringifyRelativeIndex(r1)} - ${stringifyRelativeIndex(r1)}`;
+    }
+
+    function stringifySelectedRange(selection, coord) {
+      const [c1, c2] = [`${coord}1`, `${coord}2`];
+      return selection.absolute[c1] === selection.absolute[c2]
+        ? stringifyIndex(selection.relative[c1])
+        : stringifyRange(selection.relative[c1], selection.relative[c2]);
+    }
+
+    function stringifySelection(selection) {
+      return (
+        `X: ${stringifySelectedRange(selection, "x")},`
+        + ` Y: ${stringifySelectedRange(selection, "y")};`
+        + ` ${selectionIsPoint(selection) ? "" : "mean "}PAE: ${selection.mean}`
+      );
+    }
+
     viewer.addEventListener("pv-select-region-pae", (event) => {
       console.log(event.detail);
     });
 
     viewer.addEventListener("pv-move-cursor", (event) => {
-      console.log(event.detail);
+      cursorInfo.innerText = stringifySelection(event.detail);
+    });
+
+    document.addEventListener("mousemove", (event) => {
+      cursorInfo.innerText = "";
     });
 
     document.getElementById("export-button").addEventListener("click", () => {
@@ -58,11 +89,18 @@
         viewer.showRegions(false);
       }
     });
-
   </script>
 </head>
 <body>
 <div id="pae-viewer" style="margin: 100px; width: 360px; height: 360px"></div>
+
+<div>
+  <span>Cursor: </span><span id="cursor-info"></span>
+</div>
+
+<div>
+  <span>Selection: </span><span id="selection-info"></span>
+</div>
 
 <button id="export-button">Export SVG</button>
 </body>
