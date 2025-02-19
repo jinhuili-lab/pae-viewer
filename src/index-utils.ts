@@ -38,11 +38,10 @@ export class IndexUtils {
 
   public static getAbsoluteRangeFromPoint(
     totalLength: number,
-    start: Point,
-    end?: Point,
+    point: Point,
   ): IndexRange<AbsoluteIndex> {
-    const x = IndexUtils.getAbsoluteIndexFromFraction(start.x, totalLength);
-    const y = IndexUtils.getAbsoluteIndexFromFraction(start.y, totalLength);
+    const x = IndexUtils.getAbsoluteIndexFromFraction(point.x, totalLength);
+    const y = IndexUtils.getAbsoluteIndexFromFraction(point.y, totalLength);
     return { x1: x, y1: y, x2: x, y2: y };
   }
 
