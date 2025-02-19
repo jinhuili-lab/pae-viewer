@@ -92,6 +92,13 @@ export class SelectionLayer extends EventTarget {
       event.preventDefault();
       event.stopPropagation();
 
+      this.dispatchEvent(
+          Utils.createEvent<MoveCursorEvent>(
+            "move-cursor",
+            Utils.getRelativeMousePosition(event),
+          ),
+        );
+
       if (start) {
         selectingArea = true;
 
@@ -100,13 +107,6 @@ export class SelectionLayer extends EventTarget {
             start: start,
             end: Utils.getRelativeMousePosition(event),
           }),
-        );
-      } else {
-        this.dispatchEvent(
-          Utils.createEvent<MoveCursorEvent>(
-            "move-cursor",
-            Utils.getRelativeMousePosition(event),
-          ),
         );
       }
     });
