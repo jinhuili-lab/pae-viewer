@@ -222,8 +222,8 @@ export class PaeViewer<
           this._getSelectionFromPoints(
             data.pae,
             data.subunits,
-            (event as SelectingAreaEvent).detail.start,
-            (event as SelectingAreaEvent).detail.end,
+            (event as SelectAreaEvent).detail.start,
+            (event as SelectAreaEvent).detail.end,
           ),
         ),
       );
