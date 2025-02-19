@@ -57,11 +57,6 @@ export class PaeViewer<
       font-size: var(--pv-font-size);
     }
 
-    .pv-axes > line {
-      color: var(--pv-chart-color);
-      stroke-width: var(--pv-chart-line-thickness);
-    }
-
     .pv-region {
       opacity: 0.7;
     }
@@ -78,6 +73,11 @@ export class PaeViewer<
 
     .pv-pae-matrix {
       cursor: crosshair;
+    }
+
+    .pv-axes > line {
+      stroke: var(--pv-chart-color);
+      stroke-width: var(--pv-marker-outline-thickness);
     }
 
     .pv-region-label > text {
