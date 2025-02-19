@@ -35,10 +35,15 @@
 
     const cursorInfo = document.getElementById("cursor-info");
     const selectionInfo = document.getElementById("selection-info");
+
+    function getSubunitName(subunit) {
+      return subunit.entity.name ?? subunit.entity.id;
+    }
+
     const selectionIsPoint = p => p.absolute.x1 === p.absolute.x2 && p.absolute.y1 === p.absolute.y2;
 
     function stringifyIndex(relative) {
-      return `${relative.residue.name ?? relative.residue.symbol} ${relative.index + 1}`;
+      return `${relative.residue.name ?? relative.residue.symbol} ${relative.index + 1} (${getSubunitName(relative.subunit)})`;
     }
 
     function stringifyRange(r1, r2) {
@@ -60,7 +65,25 @@
       );
     }
 
-    const getSubunitName = (s) => s.entity.name ?? s.entity.id;
+    viewer.addEventListener("pv-move-cursor", (event) => {
+      cursorInfo.innerText = stringifySelection(event.detail);
+    });
+
+    document.addEventListener("mousemove", (event) => {
+      cursorInfo.innerText = "";
+    });
+
+    viewer.addEventListener("pv-select-point", (event) => {
+      selectionInfo.innerText = stringifySelection(event.detail);
+    });
+
+    viewer.addEventListener("pv-selecting-area", (event) => {
+      selectionInfo.innerText = stringifySelection(event.detail);
+    });
+
+    viewer.addEventListener("pv-select-area", (event) => {
+      selectionInfo.innerText = stringifySelection(event.detail);
+    });
 
     viewer.addEventListener("pv-select-region-pae", (event) => {
       let info = "";
@@ -77,12 +100,8 @@
       selectionInfo.innerText = info + `; mean PAE: ${event.detail.mean}`;
     });
 
-    viewer.addEventListener("pv-move-cursor", (event) => {
-      cursorInfo.innerText = stringifySelection(event.detail);
-    });
-
-    document.addEventListener("mousemove", (event) => {
-      cursorInfo.innerText = "";
+    document.addEventListener("mousedown", (event) => {
+      selectionInfo.innerText = "";
     });
 
     document.getElementById("export-button").addEventListener("click", () => {

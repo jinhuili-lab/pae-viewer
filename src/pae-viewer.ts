@@ -189,15 +189,44 @@ export class PaeViewer<
     });
 
     layer.addEventListener("select-point", (event) => {
-      console.log(event.type, (event as SelectPointEvent).detail);
+      this.dispatchEvent(
+        Utils.createEvent<PaeSelectionEvent>(
+          "pv-select-point",
+          this._getSelectionFromPoint(
+            data.pae,
+            data.subunits,
+            (event as SelectPointEvent).detail,
+          ),
+        ),
+      );
     });
 
     layer.addEventListener("selecting-area", (event) => {
-      console.log(event.type, (event as SelectingAreaEvent).detail);
+      this.dispatchEvent(
+        Utils.createEvent<PaeSelectionEvent>(
+          "pv-selecting-area",
+          this._getSelectionFromPoints(
+            data.pae,
+            data.subunits,
+            (event as SelectingAreaEvent).detail.start,
+            (event as SelectingAreaEvent).detail.end,
+          ),
+        ),
+      );
     });
 
     layer.addEventListener("select-area", (event) => {
-      console.log(event.type, (event as SelectAreaEvent).detail);
+     this.dispatchEvent(
+        Utils.createEvent<PaeSelectionEvent>(
+          "pv-select-area",
+          this._getSelectionFromPoints(
+            data.pae,
+            data.subunits,
+            (event as SelectingAreaEvent).detail.start,
+            (event as SelectingAreaEvent).detail.end,
+          ),
+        ),
+      );
     });
 
     return layer;
