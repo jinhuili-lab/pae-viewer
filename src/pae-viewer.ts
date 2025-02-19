@@ -442,7 +442,7 @@ export class PaeViewer<
         const otherCoord = { x: "y", y: "x" }[coord];
         const extent = Utils.toPercentage(index / total);
 
-        SvgUtils.createSvgElement("line", {
+        SvgUtils.createElement("line", {
           root: group,
           classes: ["pv-divider"],
           attributes: {
@@ -538,7 +538,7 @@ export class PaeViewer<
     outerSvg.setAttribute("width", width.toString());
     outerSvg.setAttribute("height", height.toString());
 
-    const container = SvgUtils.createSvgElement("g", {
+    const container = SvgUtils.createElement("g", {
       attributes: {
         transform: `translate(${-bbox.x + pad.left}, ${-bbox.y + pad.top})`,
       },

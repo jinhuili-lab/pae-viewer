@@ -107,9 +107,9 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
     totalLength: number,
     patternId?: string,
   ) {
-    const region = SvgUtils.createSvgElement("g", { classes: ["pv-region"] });
+    const region = SvgUtils.createElement("g", { classes: ["pv-region"] });
 
-    const background = SvgUtils.createSvgElement("rect", {
+    const background = SvgUtils.createElement("rect", {
       attributes: {
         x: Utils.toPercentage(subunitX.offset / totalLength),
         y: Utils.toPercentage(subunitY.offset / totalLength),
@@ -219,7 +219,7 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
   ) {
     const box = label.getBBox();
 
-    return SvgUtils.createSvgElement("rect", {
+    return SvgUtils.createElement("rect", {
       classes: ["pv-region-label-box"],
       attributes: {
         x: box.x - horizontalPadding,

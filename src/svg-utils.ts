@@ -1,7 +1,7 @@
 import { Utils } from "./utils.js";
 
 export class SvgUtils {
-  public static createSvgElement<K extends keyof SVGElementTagNameMap>(
+  public static createElement<K extends keyof SVGElementTagNameMap>(
     name: K,
     options?: ElementOptions<SVGElementTagNameMap[K]>,
   ): SVGElementTagNameMap[K] {
@@ -32,13 +32,13 @@ export class SvgUtils {
     verticalGapFactor: number = 1,
     options: ElementOptions<SVGTextElement> = {},
   ): SVGSVGElement {
-    const group = SvgUtils.createSvgElement("svg", {
+    const group = SvgUtils.createElement("svg", {
       attributes: { overflow: "visible" },
     });
 
     group.append(
       ...lines.map((line, i) => {
-        return SvgUtils.createSvgElement("text", {
+        return SvgUtils.createElement("text", {
           attributes: {
             x: 0,
             y: `${i * verticalGapFactor - ((lines.length - 1) * verticalGapFactor) / 2}em`,
@@ -73,7 +73,7 @@ export class SvgUtils {
       ? { top: padding, right: padding, bottom: padding, left: padding }
       : padding;
 
-    return SvgUtils.createSvgElement("rect", {
+    return SvgUtils.createElement("rect", {
       ...options,
       attributes: {
         x: x - left,
