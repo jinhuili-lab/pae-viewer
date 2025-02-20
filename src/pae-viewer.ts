@@ -32,6 +32,7 @@ import {
   SelectPointEvent,
 } from "./selection-layer.js";
 import { IndexUtils } from "./index-utils.js";
+import { Axes } from "./axes.js";
 
 export class PaeViewer<
   R extends Residue = Residue,
@@ -77,7 +78,25 @@ export class PaeViewer<
 
     .pv-axes > line {
       stroke: var(--pv-chart-color);
-      stroke-width: var(--pv-marker-outline-thickness);
+      stroke-width: var(pv-chart-line-thickness);
+    }
+
+    .pv-tick {
+      stroke: var(--pv-chart-color);
+      stroke-width: var(--pv-chart-line-thickness);
+    }
+
+    .pv-divider-tick {
+      &.pv-tick-x {
+        transform: scaleY(400%);
+      }
+      &.pv-tick-y {
+        transform: scaleX(400%);
+      }
+    }
+
+    .pv-axis-label {
+      text-anchor: middle;
     }
 
     .pv-region-label > text {
@@ -103,24 +122,7 @@ export class PaeViewer<
       height="100%"
       style="image-rendering:pixelated"
     />
-    <g class="pv-axes">
-      <text class="pv-axis-x-label" x="50%" y="-25%" text-anchor="middle"
-            font-family="Arial, Helvetica, sans-serif">
-        Scored residue / atom
-      </text>
-      <text class="pv-axis-y-label" x="-35%" y="50%" text-anchor="middle"
-            font-family="Arial, Helvetica, sans-serif"
-            transform-origin="-35% 50%" transform="rotate(-90)">
-        Aligned residue / atom
-      </text>
-      <line class="pv-axis-x" x1="-5%" y1="0" x2="105%" y2="0" />
-      <line class="pv-axis-y" x1="0" y1="-5%" x2="0" y2="105%" />
-      <line class="pv-axis-diagonal" x1="0" y1="0" x2="102%" y2="102%" />
-      <g class="pv-sequence-ticks"></g>
-      <g class="pv-unit-ticks"></g>
-      <g class="pv-unit-tick-labels"></g>
-      <g class="pv-sequence-tick-labels"></g>
-    </g>
+    <g class="pv-axes"></g>
     <g class="pv-dividers"></g>
     <g class="pv-interactive-layer">
       <g class="pv-selections"></g>
@@ -147,6 +149,8 @@ export class PaeViewer<
         processed.subunits.map((subunit) => subunit.length),
         this._element.querySelector(".pv-dividers") as SVGGElement,
       );
+
+      new Axes(this._element.querySelector(".pv-axes")!, processed.subunits);
 
       this._setupSelectionLayer(
         this._element.querySelector(".pv-selections")!,
@@ -216,7 +220,7 @@ export class PaeViewer<
     });
 
     layer.addEventListener("select-area", (event) => {
-     this.dispatchEvent(
+      this.dispatchEvent(
         Utils.createEvent<PaeSelectionEvent>(
           "pv-select-area",
           this._getSelectionFromPoints(
