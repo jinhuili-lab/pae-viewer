@@ -88,7 +88,7 @@ export class RegionLayer<S extends Subunit = Subunit> extends EventTarget {
   ): SVGGElement[] {
     const total = Utils.sum(subunits.map((subunit) => subunit.length));
 
-    return Array.from(Utils.cartesian(subunits, subunits)).map(
+    return Array.from(Utils.cartesian2(subunits, subunits)).map(
       ([subunitX, subunitY]) =>
         this._addRegion(
           root,

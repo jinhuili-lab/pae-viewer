@@ -54,10 +54,14 @@ export class Utils {
    *
    * Source: https://stackoverflow.com/a/44012184
    */
-  public static *cartesian(head: any[], ...tail: any[][]): Generator<any[]> {
+  public static *cartesianN(head: any[], ...tail: any[][]): Generator<any> {
     const remainder =
-      tail.length > 0 ? Utils.cartesian(tail[0], ...tail.slice(1)) : [[]];
+      tail.length > 0 ? Utils.cartesianN(tail[0], ...tail.slice(1)) : [[]];
     for (let r of remainder) for (let h of head) yield [h, ...r];
+  }
+
+  public static cartesian2<A, B>(a: A[], b: B[]): Generator<[A, B]> {
+    return Utils.cartesianN(a, b);
   }
 
   public static cumsum(values: number[]): number[] {
