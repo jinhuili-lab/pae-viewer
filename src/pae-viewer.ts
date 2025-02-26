@@ -56,6 +56,7 @@ export class PaeViewer<
       --pv-color-y: orange;
       --pv-color-overlap: magenta;
       font-size: var(--pv-font-size);
+      user-select: none;
     }
 
     .pv-region {
