@@ -6,7 +6,25 @@ import { SvgUtils } from "./svg-utils.js";
  * Adds the axes to the PAE matrix, including labeled ticks and subunit labels.
  */
 export class Axes<S extends Subunit = Subunit> extends EventTarget {
-  private readonly _tickLength = 0.02;
+  private readonly _defaultStyle: AxesStyle = {
+    unitTickLength: 0.02,
+    dividerTickLength: 0.08,
+    tickLabelGap: 0.01,
+    minSpacing: 0.1,
+    intervalOptions: [1, 5, 10, 25, 50, 100],
+    interval: (domain: number) => {
+      const minInterval = domain * this._style.minSpacing;
+      const options = this._style.intervalOptions;
+      const maxInterval = options[options.length - 1];
+
+      return (
+        options.find((option) => option >= minInterval) ??
+        Math.ceil(minInterval / maxInterval) * maxInterval
+      );
+    },
+  };
+
+  private _style: AxesStyle;
 
   private readonly _template: SVGSVGElement = Utils.fromHtml(
     `
@@ -21,70 +39,77 @@ export class Axes<S extends Subunit = Subunit> extends EventTarget {
       <line class="pv-axis-x" x1="-5%" y1="0" x2="105%" y2="0"></line>
       <line class="pv-axis-y" x1="0" y1="-5%" x2="0" y2="105%"></line>
       <line class="pv-axis-diagonal" x1="0" y1="0" x2="102%" y2="102%"></line>
-      <g class="pv-sequence-ticks"></g>
-      <g class="pv-unit-ticks"></g>
-      <g class="pv-unit-tick-labels"></g>
-      <g class="pv-sequence-tick-labels"></g>
+      <g class="pv-ticks"></g>
     </svg>
   `,
   ).querySelector("svg")!;
 
   private readonly _root: SVGGElement;
 
-  public constructor(root: SVGGElement, subunits: S[]) {
+  public constructor(
+    root: SVGGElement,
+    subunits: S[],
+    style: Partial<AxesStyle> = {},
+  ) {
     super();
     this._root = root;
+    this._style = { ...this._defaultStyle, ...style };
 
-    this._addTicks(
-      this._template.querySelector(".pv-unit-ticks")!,
-      subunits,
-      1,
-    );
     this._root.replaceChildren(...this._template.children);
+    this._addTicks(
+      this._root.querySelector(".pv-ticks")!,
+      subunits,
+      this._style,
+    );
   }
 
-  private _addTicks(root: SVGGElement, subunits: Subunit[], interval: number) {
+  private _addTicks(root: SVGGElement, subunits: Subunit[], style: AxesStyle) {
     const axes = ["x", "y"] as unknown as [Axis, Axis];
     const total = Utils.sum(subunits.map((subunit) => subunit.length));
+
+    const interval =
+      typeof style.interval === "number"
+        ? style.interval
+        : style.interval(total);
 
     for (let [axis, subunit] of Utils.cartesian2(axes, subunits)) {
       const isLast = subunit.index !== subunits.length - 1;
 
-      root.appendChild(
-        this._createTick(
-          axis,
-          (subunit.offset + subunit.length) / total,
-          `${subunit.length}${isLast ? "" : " / 0"}`,
-          this._tickLength,
-          "pv-divider-tick",
-        ),
+      this._addTick(
+        root,
+        axis,
+        (subunit.offset + subunit.length) / total,
+        `${subunit.length}${isLast ? "" : " / 0"}`,
+        style.dividerTickLength,
+        style.tickLabelGap,
+        "pv-divider-tick",
       );
 
       for (let value of Utils.range(
         interval,
-        subunit.length - 0.1 * interval,
+        subunit.length - style.minSpacing * interval,
         interval,
       )) {
-        console.log(subunit.offset, value);
-
-        root.appendChild(
-          this._createTick(
-            axis,
-            (subunit.offset + value) / total,
-            value.toString(),
-            this._tickLength,
-            "pv-unit-tick",
-          ),
+        this._addTick(
+          root,
+          axis,
+          (subunit.offset + value) / total,
+          value.toString(),
+          style.unitTickLength,
+          style.tickLabelGap,
+          "pv-unit-tick",
         );
       }
     }
   }
 
-  private _createTick(
+  private _addTick(
+    root: SVGGElement,
     axis: Axis,
-    position: number,
+    value: number,
     label: string,
-    length: number,
+    tickLength: number,
+    labelGap: number,
     cssClass?: string,
   ) {
     const otherAxis = axis === "x" ? "y" : "x";
@@ -94,63 +119,63 @@ export class Axes<S extends Subunit = Subunit> extends EventTarget {
       classes.push(cssClass);
     }
 
-    return SvgUtils.createElement("line", {
+    const tick = SvgUtils.createElement("line", {
       classes: classes,
       attributes: {
-        [`${axis}1`]: Utils.toPercentage(position),
-        [`${axis}2`]: Utils.toPercentage(position),
+        [`${axis}1`]: Utils.toPercentage(value),
+        [`${axis}2`]: Utils.toPercentage(value),
         [`${otherAxis}1`]: "0",
-        [`${otherAxis}2`]: Utils.toPercentage(-length),
+        [`${otherAxis}2`]: Utils.toPercentage(-tickLength),
       },
     });
 
-    // const labelCoords = [ratio, -length];
-    //
-    // rootTick.appendChild(tick);
-    // this.#addTickLabel(
-    //   labelsRoot,
-    //   ...(axis === "x" ? labelCoords : labelCoords.reverse()),
-    //   text !== null ? text : value,
-    //   anchor,
-    //   baseline,
-    // );
+    root.appendChild(tick);
+
+    const coords = [value, -(tickLength + labelGap)];
+
+    this.#addTickLabel(
+      root,
+      ...((axis === "x" ? coords : coords.reverse()) as [number, number]),
+      label ?? value.toString(),
+      axis === "x" ? "middle" : "end",
+      axis === "x" ? "auto" : "central",
+    );
   }
 
-  // #addTickLabel(
-  //   root,
-  //   x,
-  //   y,
-  //   text,
-  //   anchor,
-  //   baseline,
-  //   addBackground = true,
-  //   params = {},
-  //   backgroundParams = {},
-  // ) {
-  //   const fontSize = this.#style.elements.ticks.fontSize;
-  //
-  //   const label = Utils.createSVG("text", "pv-tick-label", {
-  //     x: Utils.toPercentage(x),
-  //     y: Utils.toPercentage(y),
-  //     "text-anchor": anchor,
-  //     "dominant-baseline": baseline,
-  //     "font-size": fontSize * this.#viewBox.height,
-  //     "font-family": this.#style.general.fontFamily,
-  //     ...params,
-  //   });
-  //   label.textContent = text;
-  //   root.appendChild(label);
-  //
-  //   if (addBackground) {
-  //     const background = this.#createBackgroundBox(
-  //       label.getBBox(),
-  //       0.1 * fontSize,
-  //       0,
-  //       backgroundParams,
-  //     );
-  //     root.insertBefore(background, label);
-  //   }
-  // }
+  #addTickLabel(
+    root: SVGGElement,
+    x: number,
+    y: number,
+    content: string,
+    anchor: string,
+    baseline: string,
+    addBackground = true,
+    labelClass?: string,
+    backgroundClass?: string,
+  ) {
+    const label = SvgUtils.createElement("text", {
+      classes: ["pv-tick-label", ...(labelClass ? [labelClass] : [])],
+      attributes: {
+        x: Utils.toPercentage(x),
+        y: Utils.toPercentage(y),
+        "text-anchor": anchor,
+        "dominant-baseline": baseline,
+      },
+      textContent: content,
+    });
+
+    root.appendChild(label);
+
+    // if (addBackground) {
+    //   const background = this.#createBackgroundBox(
+    //     label.getBBox(),
+    //     0.1 * fontSize,
+    //     0,
+    //     backgroundParams,
+    //   );
+    //   root.insertBefore(background, label);
+    // }
+  }
 
   // private _addTicks(subunits: Subunit) {
   //   let offset = 0;
@@ -226,3 +251,12 @@ export class Axes<S extends Subunit = Subunit> extends EventTarget {
 }
 
 type Axis = "x" | "y";
+
+export interface AxesStyle {
+  unitTickLength: number;
+  dividerTickLength: number;
+  tickLabelGap: number;
+  minSpacing: number;
+  intervalOptions: number[];
+  interval: number | ((domain: number) => number);
+}

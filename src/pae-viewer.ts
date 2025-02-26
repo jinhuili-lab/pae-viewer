@@ -86,15 +86,6 @@ export class PaeViewer<
       stroke-width: var(--pv-chart-line-thickness);
     }
 
-    .pv-divider-tick {
-      &.pv-tick-x {
-        transform: scaleY(400%);
-      }
-      &.pv-tick-y {
-        transform: scaleX(400%);
-      }
-    }
-
     .pv-axis-label {
       text-anchor: middle;
     }
