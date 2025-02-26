@@ -136,9 +136,13 @@ export class PaeViewer<
       this._paeData = processed;
       this._updateImage(processed.pae, this._paeColorScale);
       this._updateEntityColors(processed.subunits);
+
+      const dividersGroup = this._element.querySelector(".pv-dividers") as SVGGElement;
+      dividersGroup.replaceChildren();
+
       this._addDividers(
         processed.subunits.map((subunit) => subunit.length),
-        this._element.querySelector(".pv-dividers") as SVGGElement,
+        dividersGroup,
       );
 
       new Axes(this._element.querySelector(".pv-axes")!, processed.subunits);
