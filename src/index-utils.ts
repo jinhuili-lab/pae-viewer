@@ -5,22 +5,22 @@ import {
   IndexRange,
   Point,
   RelativeIndex,
-  Residue,
+  Token,
   Subunit,
 } from "./types.js";
 
 export class IndexUtils {
   public static getAbsoluteIndex<
-    R extends Residue = Residue,
-    E extends Entity<R> = Entity<R>,
-  >(relative: RelativeIndex<R, E>): AbsoluteIndex {
+    T extends Token = Token,
+    E extends Entity<T> = Entity<T>,
+  >(relative: RelativeIndex<T, E>): AbsoluteIndex {
     return relative.subunit.offset + relative.index;
   }
 
   public static getAbsoluteRange<
-    R extends Residue = Residue,
-    E extends Entity<R> = Entity<R>,
-  >(relative: IndexRange<RelativeIndex<R, E>>): IndexRange<AbsoluteIndex> {
+    T extends Token = Token,
+    E extends Entity<T> = Entity<T>,
+  >(relative: IndexRange<RelativeIndex<T, E>>): IndexRange<AbsoluteIndex> {
     return {
       x1: IndexUtils.getAbsoluteIndex(relative.x1),
       y1: IndexUtils.getAbsoluteIndex(relative.y1),
@@ -66,9 +66,9 @@ export class IndexUtils {
   }
 
   public static getRelativeIndex<
-    R extends Residue = Residue,
-    E extends Entity<R> = Entity<R>,
-  >(absolute: AbsoluteIndex, subunits: Subunit<E>[]): RelativeIndex<R, E> {
+    T extends Token = Token,
+    E extends Entity<T> = Entity<T>,
+  >(absolute: AbsoluteIndex, subunits: Subunit<E>[]): RelativeIndex<T, E> {
     const subunit = subunits.find(
       (subunit) =>
         subunit.offset <= absolute &&
@@ -78,18 +78,18 @@ export class IndexUtils {
 
     return {
       subunit: subunit,
-      residue: subunit.entity.sequence[index],
+      token: subunit.entity.sequence[index],
       index: index,
     };
   }
 
   public static getRelativeRange<
-    R extends Residue = Residue,
-    E extends Entity<R> = Entity<R>,
+    T extends Token = Token,
+    E extends Entity<T> = Entity<T>,
   >(
     absolute: IndexRange<AbsoluteIndex>,
     subunits: Subunit<E>[],
-  ): IndexRange<RelativeIndex<R, E>> {
+  ): IndexRange<RelativeIndex<T, E>> {
     return {
       x1: IndexUtils.getRelativeIndex(absolute.x1, subunits),
       y1: IndexUtils.getRelativeIndex(absolute.y1, subunits),

@@ -18,15 +18,21 @@ export interface PaeData<
 
 export type Pae = number[][];
 
-export interface Residue {
+/**
+ * A token is a single element in the sequence of entities which is scored by
+ * the PAE. It represents a residue in proteins, a nucleotide for nucleic acids
+ * (DNA / RNA), and a heavy atom (= not hydrogen) for ligands and
+ * post-translational modifications.
+ */
+export interface Token {
   symbol: string;
   name?: string;
 }
 
-export interface Entity<R extends Residue = Residue> {
+export interface Entity<T extends Token = Token> {
   id: string | number;
   name?: string;
-  sequence: R[];
+  sequence: T[];
 }
 
 export interface Subunit<E extends Entity = Entity> {
@@ -52,11 +58,11 @@ export interface CrosslinkedResidue {
 }
 
 export interface RelativeIndex<
-  R extends Residue = Residue,
-  E extends Entity<R> = Entity<R>,
+  T extends Token = Token,
+  E extends Entity<T> = Entity<T>,
 > {
   subunit: Subunit<E>;
-  residue: R;
+  token: T;
   index: number;
 }
 

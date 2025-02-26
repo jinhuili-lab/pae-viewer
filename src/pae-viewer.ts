@@ -11,7 +11,7 @@ import {
   PaeInput,
   Point,
   RelativeIndex,
-  Residue,
+  Token,
   RgbColor,
   Subunit,
 } from "./types.js";
@@ -35,8 +35,8 @@ import { IndexUtils } from "./index-utils.js";
 import { Axes } from "./axes.js";
 
 export class PaeViewer<
-  R extends Residue = Residue,
-  E extends Entity<R> = Entity<R>,
+  T extends Token = Token,
+  E extends Entity<T> = Entity<T>,
   C extends Crosslink<CrosslinkIndex<E>> = Crosslink<CrosslinkIndex<E>>,
 > extends EventTarget {
   private readonly _template: string = `
@@ -240,13 +240,13 @@ export class PaeViewer<
       const getRelative = (
         subunit: Subunit<E>,
         index: number,
-      ): RelativeIndex<R, E> => ({
+      ): RelativeIndex<T, E> => ({
         subunit: subunit,
-        residue: subunit.entity.sequence[index],
+        token: subunit.entity.sequence[index],
         index: index,
       });
 
-      const relative: IndexRange<RelativeIndex<R, E>> = {
+      const relative: IndexRange<RelativeIndex<T, E>> = {
         x1: getRelative(subunitX, 0),
         y1: getRelative(subunitY, 0),
         x2: getRelative(subunitX, subunitX.length - 1),

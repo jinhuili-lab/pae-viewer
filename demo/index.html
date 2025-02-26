@@ -43,7 +43,7 @@
     const selectionIsPoint = p => p.absolute.x1 === p.absolute.x2 && p.absolute.y1 === p.absolute.y2;
 
     function stringifyIndex(relative) {
-      return `${relative.residue.name ?? relative.residue.symbol} ${relative.index + 1} (${getSubunitName(relative.subunit)})`;
+      return `${relative.token.name ?? relative.token.symbol} ${relative.index + 1} (${getSubunitName(relative.subunit)})`;
     }
 
     function stringifyRange(r1, r2) {

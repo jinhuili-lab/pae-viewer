@@ -30,11 +30,11 @@ export class Axes<S extends Subunit = Subunit> extends EventTarget {
     `
     <svg xmlns="http://www.w3.org/2000/svg">
       <text class="pv-axis-label pv-axis-label-x" x="50%" y="-25%" >
-        Scored residue / atom
+        Scored token
       </text>
       <text class="pv-axis-label pv-axis-label-y" x="-35%" y="50%"
             transform-origin="-35% 50%" transform="rotate(-90)">
-        Aligned residue / atom
+        Aligned token
       </text>
       <line class="pv-axis-x" x1="-5%" y1="0" x2="105%" y2="0"></line>
       <line class="pv-axis-y" x1="0" y1="-5%" x2="0" y2="105%"></line>
