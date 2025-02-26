@@ -8,7 +8,7 @@
     src=" https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js "></script>
 
   <script type="module" defer>
-    import { PaeViewer } from "../dist/index.js";
+    import { PaeViewer, Utils } from "../dist/index.js";
     import chroma from "https://cdn.jsdelivr.net/npm/chroma-js@3.1.2/+esm";
 
     const viewer = new PaeViewer(document.getElementById("pae-viewer"));
@@ -63,6 +63,27 @@
         + ` Y: ${stringifySelectedRange(selection, "y")};`
         + ` ${selectionIsPoint(selection) ? "" : "mean "}PAE: ${selection.mean}`
       );
+    }
+
+    function readAsText(file) {
+      const reader = new FileReader();
+
+      const promise = new Promise((resolve, reject) => {
+        reader.addEventListener("load", () => {
+          try {
+            resolve(reader.result);
+          } catch (e) {
+            reject(e);
+          }
+        }, false);
+
+        reader.addEventListener("error", e => {
+          reject(e);
+        });
+      });
+
+      reader.readAsText(file);
+      return promise;
     }
 
     viewer.addEventListener("pv-move-cursor", (event) => {
@@ -121,6 +142,21 @@
         viewer.showRegions(false);
       }
     });
+
+
+    document.getElementById("pae-file-input").addEventListener("input", event => {
+      const file = event.target.files[0];
+
+      readAsText(file).then(content => {
+        const pae = JSON.parse(content)["pae"];
+
+        viewer.setPae({
+          pae: pae,
+          entities: [Utils.createDummyEntity(pae.length)]
+        });
+      });
+    });
+
   </script>
 </head>
 <body>
@@ -134,6 +170,12 @@
   <span>Selection: </span><span id="selection-info"></span>
 </div>
 
-<button id="export-button">Export SVG</button>
+<div>
+  <button id="export-button">Export SVG</button>
+</div>
+
+<div>
+  <input type="file" id="pae-file-input" accept=".json">
+</div>
 </body>
 </html>
