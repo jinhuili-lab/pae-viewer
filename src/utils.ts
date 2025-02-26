@@ -1,4 +1,4 @@
-import { LinearColorScale, Point, RgbColor } from "./types";
+import { Entity, LinearColorScale, Point, RgbColor } from "./types";
 
 export class Utils {
   public static setAttributes<E extends Element = Element>(
@@ -111,10 +111,13 @@ export class Utils {
   }
 
   public static getRelativeMousePosition(event: MouseEvent): Point {
-    return Utils.getMousePositionRelativeTo(event, (event.target as Element));
+    return Utils.getMousePositionRelativeTo(event, event.target as Element);
   }
 
-  public static getMousePositionRelativeTo(event: MouseEvent, element: Element): Point {
+  public static getMousePositionRelativeTo(
+    event: MouseEvent,
+    element: Element,
+  ): Point {
     const rect = element.getBoundingClientRect();
 
     return {
@@ -128,5 +131,13 @@ export class Utils {
     detail: E["detail"],
   ): CustomEvent<E["detail"]> {
     return new CustomEvent<E["detail"]>(type, { detail });
+  }
+
+  public static createDummyEntity(length: number): Entity {
+    return {
+      id: 0,
+      name: "dummy",
+      sequence: Array(length).fill({ symbol: "X" }),
+    };
   }
 }
