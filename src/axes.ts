@@ -73,7 +73,7 @@ export class Axes<S extends Subunit = Subunit> extends EventTarget {
         : style.interval(total);
 
     for (let [axis, subunit] of Utils.cartesian2(axes, subunits)) {
-      const isLast = subunit.index !== subunits.length - 1;
+      const isLast = subunit.index === subunits.length - 1;
 
       this._addTick(
         root,
