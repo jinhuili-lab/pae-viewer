@@ -56,6 +56,17 @@ export class Axes<S extends Subunit = Subunit> extends EventTarget {
     this._style = { ...this._defaultStyle, ...style };
 
     this._root.replaceChildren(...this._template.children);
+
+    // this.#addTickLabel(
+    //   this.#axesGroup,
+    //   -style.ticks.labelGap,
+    //   -style.ticks.labelGap,
+    //   "0",
+    //   "end",
+    //   "auto",
+    //   false,
+    // );
+
     this._addTicks(
       this._root.querySelector(".pv-ticks")!,
       subunits,
@@ -137,8 +148,8 @@ export class Axes<S extends Subunit = Subunit> extends EventTarget {
       root,
       ...((axis === "x" ? coords : coords.reverse()) as [number, number]),
       label ?? value.toString(),
-      axis === "x" ? "middle" : "end",
-      axis === "x" ? "auto" : "central",
+      true,
+      `pv-tick-label-${axis}`,
     );
   }
 
@@ -147,8 +158,6 @@ export class Axes<S extends Subunit = Subunit> extends EventTarget {
     x: number,
     y: number,
     content: string,
-    anchor: string,
-    baseline: string,
     addBackground = true,
     labelClass?: string,
     backgroundClass?: string,
@@ -158,8 +167,6 @@ export class Axes<S extends Subunit = Subunit> extends EventTarget {
       attributes: {
         x: Utils.toPercentage(x),
         y: Utils.toPercentage(y),
-        "text-anchor": anchor,
-        "dominant-baseline": baseline,
       },
       textContent: content,
     });
