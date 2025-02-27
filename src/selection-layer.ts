@@ -1,5 +1,6 @@
-import { Point } from "./types.js";
+import { IndexArea, Interval, Point } from "./types.js";
 import { Utils } from "./utils.js";
+import { SvgUtils } from "./svg-utils.js";
 
 /**
  * Handles selections of points and areas of the PAE matrix by processing
@@ -51,11 +52,11 @@ export class SelectionLayer extends EventTarget {
     this._root = root;
     this._root.replaceChildren();
 
-    this._setupListeners(matrix);
+    this._setupListeners(this._root, matrix);
   }
 
-  private _setupListeners(matrix: SVGImageElement) {
-    let start: Point | null = null;
+  private _setupListeners(root: SVGGElement, matrix: SVGImageElement) {
+    let start: Point<number> | null = null;
     let selectingArea: boolean = false;
 
     matrix.addEventListener("mousedown", (event: MouseEvent) => {
@@ -71,11 +72,15 @@ export class SelectionLayer extends EventTarget {
 
       if (start) {
         if (selectingArea) {
+          const selection = this._getAreaSelection(
+            start,
+            Utils.getRelativeMousePosition(event),
+          );
+
+          this._displayAreaSelection(root, selection);
+
           this.dispatchEvent(
-            Utils.createEvent<SelectAreaEvent>("select-area", {
-              start: start,
-              end: Utils.getRelativeMousePosition(event),
-            }),
+            Utils.createEvent<SelectAreaEvent>("select-area", selection),
           );
         } else {
           this.dispatchEvent(
@@ -89,24 +94,37 @@ export class SelectionLayer extends EventTarget {
     });
 
     matrix.addEventListener("mousemove", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-
       this.dispatchEvent(
-          Utils.createEvent<MoveCursorEvent>(
-            "move-cursor",
-            Utils.getRelativeMousePosition(event),
-          ),
-        );
+        Utils.createEvent<CursorMoveEvent>(
+          "cursor-move",
+          Utils.getRelativeMousePosition(event),
+        ),
+      );
+    });
 
+    matrix.addEventListener("mouseleave", (event) => {
+      this.dispatchEvent(
+        Utils.createEvent<CursorLeaveEvent>("cursor-leave", undefined),
+      );
+    });
+
+    document.addEventListener("mousemove", (event) => {
       if (start) {
         selectingArea = true;
 
+        const { x, y } = Utils.getMousePositionRelativeTo(event, matrix);
+
+        const end = {
+          x: Utils.clamp(x, 0, 1),
+          y: Utils.clamp(y, 0, 1),
+        };
+
+        const selection = this._getAreaSelection(start, end);
+
+        this._displayAreaSelection(root, selection);
+
         this.dispatchEvent(
-          Utils.createEvent<SelectingAreaEvent>("selecting-area", {
-            start: start,
-            end: Utils.getRelativeMousePosition(event),
-          }),
+          Utils.createEvent<SelectingAreaEvent>("selecting-area", selection),
         );
       }
     });
@@ -116,20 +134,90 @@ export class SelectionLayer extends EventTarget {
       if (start && selectingArea) {
         const { x, y } = Utils.getMousePositionRelativeTo(event, matrix);
 
+        const end = {
+          x: Utils.clamp(x, 0, 1),
+          y: Utils.clamp(y, 0, 1),
+        };
+
+        const selection = this._getAreaSelection(start, end);
+        this._displayAreaSelection(root, selection);
+
         this.dispatchEvent(
-          Utils.createEvent<SelectAreaEvent>("select-area", {
-            start: start,
-            end: {
-              x: Utils.clamp(x, 0, 1),
-              y: Utils.clamp(y, 0, 1),
-            },
-          }),
+          Utils.createEvent<SelectAreaEvent>("select-area", selection),
         );
       }
 
       start = null;
       selectingArea = false;
     });
+  }
+
+  private _getAreaSelection(
+    start: Point<number>,
+    end: Point<number>,
+  ): AreaSelection {
+    const area = this._getArea(start, end);
+
+    return {
+      points: { start, end },
+      area: area,
+      intervals: this._getIntervals(area),
+    };
+  }
+
+  private _getArea(
+    start: Point<number>,
+    end: Point<number>,
+  ): IndexArea<number> {
+    return {
+      x1: Math.min(start.x, end.x),
+      y1: Math.min(start.y, end.y),
+      x2: Math.max(start.x, end.x),
+      y2: Math.max(start.y, end.y),
+    };
+  }
+
+  private _getIntervals(area: IndexArea<number>): AreaIntervals {
+    const x = { start: area.x1, end: area.x2 };
+    const y = { start: area.y1, end: area.y2 };
+    return { x, y, overlap: this._getOverlap(x, y) };
+  }
+
+  private _getOverlap(
+    a: Interval<number>,
+    b: Interval<number>,
+  ): Interval<number> | undefined {
+    return a.start > b.end || a.end < b.start
+      ? undefined
+      : { start: Math.max(a.start, b.start), end: Math.min(a.end, b.end) };
+  }
+
+  private _displayAreaSelection(root: SVGGElement, selection: AreaSelection) {
+    root.replaceChildren(this.createRect(selection.area));
+  }
+
+  private createRect(area: IndexArea<number>) {
+    return SvgUtils.createElement("rect", {
+      classes: ["pv-selection-rect"],
+      attributes: {
+        x: Utils.toPercentage(area.x1),
+        y: Utils.toPercentage(area.y1),
+        width: Utils.toPercentage(area.x2 - area.x1),
+        height: Utils.toPercentage(area.y2 - area.y1),
+      },
+    });
+  }
+
+  private _addMarker(point: Point<number>, cssClass?: string) {
+    const circle = SvgUtils.createElement("circle", {
+      classes: ["pv-selection-marker", cssClass ?? ""],
+      attributes: {
+        cx: Utils.toPercentage(point.x),
+        cy: Utils.toPercentage(point.y),
+      },
+    });
+
+    this._root.appendChild(circle);
   }
 
   //
@@ -620,12 +708,25 @@ export class SelectionLayer extends EventTarget {
   // }
 }
 
-export type MoveCursorEvent = CustomEvent<Point>;
-export type SelectPointEvent = CustomEvent<Point>;
+export type CursorMoveEvent = CustomEvent<Point<number>>;
+export type CursorLeaveEvent = CustomEvent<undefined>;
+export type SelectPointEvent = CustomEvent<Point<number>>;
 export type SelectAreaEvent = CustomEvent<AreaSelection>;
 export type SelectingAreaEvent = CustomEvent<AreaSelection>;
 
 export interface AreaSelection {
-  start: Point;
-  end: Point;
+  points: AreaPoints;
+  area: IndexArea<number>;
+  intervals: AreaIntervals;
+}
+
+export interface AreaPoints {
+  start: Point<number>;
+  end: Point<number>;
+}
+
+export interface AreaIntervals {
+  x: Interval<number>;
+  y: Interval<number>;
+  overlap?: Interval<number>;
 }

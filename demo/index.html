@@ -86,11 +86,11 @@
       return promise;
     }
 
-    viewer.addEventListener("pv-move-cursor", (event) => {
+    viewer.addEventListener("pv-cursor-move", (event) => {
       cursorInfo.innerText = stringifySelection(event.detail);
     });
 
-    document.addEventListener("mousemove", (event) => {
+    viewer.addEventListener("pv-cursor-leave", (_) => {
       cursorInfo.innerText = "";
     });
 

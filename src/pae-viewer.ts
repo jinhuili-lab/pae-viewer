@@ -25,7 +25,7 @@ import {
 } from "./region-layer.js";
 import { SvgUtils } from "./svg-utils.js";
 import {
-  MoveCursorEvent,
+  CursorMoveEvent,
   SelectAreaEvent,
   SelectingAreaEvent,
   SelectionLayer,
@@ -46,10 +46,11 @@ export class PaeViewer<
   <style>
     :root {
       --pv-chart-color: black;
+      --pv-selection-color: white;
       --pv-chart-line-thickness: 0.2%;
       --pv-font-size: 0.95em;
-      --pv-selection-outline-color: white;
-      --pv-marker-outline-color: white;
+      --pv-selection-outline-color: var(--pv-selection-color);
+      --pv-marker-outline-color: var(--pv-selection-color);
       --pv-marker-outline-thickness: 0.2%;
       --pv-marker-size: 1%;
       --pv-color-x: cyan;
@@ -101,6 +102,28 @@ export class PaeViewer<
       dominant-baseline: auto;
     }
 
+    .pv-selection-rect {
+      fill: var(--pv-selection-color);
+      opacity: 0.8;
+    }
+
+    .pv-selection-marker {
+      stroke-width: var(--pv-marker-outline-thickness);
+      stroke: var(--pv-marker-outline-color);
+    }
+
+    .pv-selection-marker-x {
+      fill: var(--pv-color-x);
+    }
+
+    .pv-selection-marker-y {
+      fill: var(--pv-color-y);
+    }
+
+    .pv-selection-marker-overlap {
+      fill: var(--pv-color-overlap);
+    }
+
     .pv-tick-label-y {
       text-anchor: end;
       dominant-baseline: central;
@@ -122,6 +145,10 @@ export class PaeViewer<
     .pv-divider {
       stroke: var(--pv-chart-color);
       stroke-width: 0.4%;
+    }
+
+    .pv-interactive-layer {
+      pointer-events: none;
     }
   </style>
   <style data-id="entity-colors"></style>
@@ -157,7 +184,9 @@ export class PaeViewer<
       this._updateImage(processed.pae, this._paeColorScale);
       this._updateEntityColors(processed.subunits);
 
-      const dividersGroup = this._element.querySelector(".pv-dividers") as SVGGElement;
+      const dividersGroup = this._element.querySelector(
+        ".pv-dividers",
+      ) as SVGGElement;
       dividersGroup.replaceChildren();
 
       this._addDividers(
@@ -194,16 +223,22 @@ export class PaeViewer<
   ): SelectionLayer {
     const layer = new SelectionLayer(group, matrix);
 
-    layer.addEventListener("move-cursor", (event) => {
+    layer.addEventListener("cursor-move", (event) => {
       this.dispatchEvent(
         Utils.createEvent<PaeSelectionEvent>(
-          "pv-move-cursor",
+          "pv-cursor-move",
           this._getSelectionFromPoint(
             data.pae,
             data.subunits,
-            (event as MoveCursorEvent).detail,
+            (event as CursorMoveEvent).detail,
           ),
         ),
+      );
+    });
+
+    layer.addEventListener("cursor-leave", (event) => {
+      this.dispatchEvent(
+        Utils.createEvent<PaeCursorLeaveEvent>("pv-cursor-leave", undefined),
       );
     });
 
@@ -227,8 +262,8 @@ export class PaeViewer<
           this._getSelectionFromPoints(
             data.pae,
             data.subunits,
-            (event as SelectingAreaEvent).detail.start,
-            (event as SelectingAreaEvent).detail.end,
+            (event as SelectingAreaEvent).detail.points.start,
+            (event as SelectingAreaEvent).detail.points.end,
           ),
         ),
       );
@@ -241,8 +276,8 @@ export class PaeViewer<
           this._getSelectionFromPoints(
             data.pae,
             data.subunits,
-            (event as SelectAreaEvent).detail.start,
-            (event as SelectAreaEvent).detail.end,
+            (event as SelectAreaEvent).detail.points.start,
+            (event as SelectAreaEvent).detail.points.end,
           ),
         ),
       );
@@ -616,6 +651,7 @@ export class PaeViewer<
   }
 }
 
+export type PaeCursorLeaveEvent = CustomEvent<undefined>;
 export type PaeSelectionEvent = CustomEvent<PaeSelection>;
 export type PaeRegionSelectionEvent =
   CustomEvent<PaeRegionSelectionEventDetails>;
