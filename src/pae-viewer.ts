@@ -4,16 +4,16 @@ import {
   CrosslinkIndex,
   Entity,
   EntityColorScale,
-  IndexRange,
+  IndexArea,
   LinearColorScale,
   Pae,
   PaeData,
   PaeInput,
   Point,
   RelativeIndex,
-  Token,
   RgbColor,
   Subunit,
+  Token,
 } from "./types.js";
 import { Utils } from "./utils.js";
 import { PaeUtils } from "./pae-utils.js";
@@ -270,7 +270,7 @@ export class PaeViewer<
         index: index,
       });
 
-      const relative: IndexRange<RelativeIndex<T, E>> = {
+      const relative: IndexArea<RelativeIndex<T, E>> = {
         x1: getRelative(subunitX, 0),
         y1: getRelative(subunitY, 0),
         x2: getRelative(subunitX, subunitX.length - 1),
@@ -576,7 +576,7 @@ export class PaeViewer<
   private _getSelectionFromPoint(
     pae: Pae,
     subunits: Subunit<E>[],
-    point: Point,
+    point: Point<number>,
   ) {
     const total = Utils.sum(subunits.map((subunit) => subunit.length));
     const absolute = IndexUtils.getAbsoluteRangeFromPoint(total, point);
@@ -593,8 +593,8 @@ export class PaeViewer<
   private _getSelectionFromPoints(
     pae: Pae,
     subunits: Subunit<E>[],
-    start: Point,
-    end: Point,
+    start: Point<number>,
+    end: Point<number>,
   ) {
     const total = Utils.sum(subunits.map((subunit) => subunit.length));
     const absolute = IndexUtils.getAbsoluteRangeFromPoints(total, start, end);
@@ -621,8 +621,8 @@ export type PaeRegionSelectionEvent =
   CustomEvent<PaeRegionSelectionEventDetails>;
 
 export interface PaeSelection {
-  relative: IndexRange<RelativeIndex>;
-  absolute: IndexRange<AbsoluteIndex>;
+  relative: IndexArea<RelativeIndex>;
+  absolute: IndexArea<AbsoluteIndex>;
   submatrix: number[][];
   mean: number;
 }

@@ -49,13 +49,11 @@ export interface Crosslink<T> {
 }
 
 export interface CrosslinkIndex<E extends Entity = Entity> {
-  entityId: E['id'];
+  entityId: E["id"];
   index: number;
 }
 
-export interface CrosslinkedResidue {
-
-}
+export interface CrosslinkedResidue {}
 
 export interface RelativeIndex<
   T extends Token = Token,
@@ -76,17 +74,22 @@ export type EntityColorScale<E extends Entity> = (
   index: number,
 ) => string;
 
-
 export type AbsoluteIndex = number;
+export type IndexType = RelativeIndex | AbsoluteIndex | number;
 
-export interface IndexRange<I extends RelativeIndex | AbsoluteIndex> {
+export interface IndexArea<I extends IndexType> {
   x1: I;
   y1: I;
   x2: I;
   y2: I;
 }
 
-export interface Point {
+export interface Point<I extends IndexType> {
   x: number;
   y: number;
+}
+
+export interface Interval<I extends IndexType> {
+  start: I;
+  end: I;
 }

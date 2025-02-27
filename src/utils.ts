@@ -110,14 +110,14 @@ export class Utils {
     };
   }
 
-  public static getRelativeMousePosition(event: MouseEvent): Point {
+  public static getRelativeMousePosition(event: MouseEvent): Point<number> {
     return Utils.getMousePositionRelativeTo(event, event.target as Element);
   }
 
   public static getMousePositionRelativeTo(
     event: MouseEvent,
     element: Element,
-  ): Point {
+  ): Point<number> {
     const rect = element.getBoundingClientRect();
 
     return {
