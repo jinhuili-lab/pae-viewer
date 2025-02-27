@@ -2,7 +2,7 @@ import { Utils } from "./utils.js";
 import {
   AbsoluteIndex,
   Entity,
-  IndexRange,
+  IndexArea,
   Point,
   RelativeIndex,
   Token,
@@ -20,7 +20,7 @@ export class IndexUtils {
   public static getAbsoluteRange<
     T extends Token = Token,
     E extends Entity<T> = Entity<T>,
-  >(relative: IndexRange<RelativeIndex<T, E>>): IndexRange<AbsoluteIndex> {
+  >(relative: IndexArea<RelativeIndex<T, E>>): IndexArea<AbsoluteIndex> {
     return {
       x1: IndexUtils.getAbsoluteIndex(relative.x1),
       y1: IndexUtils.getAbsoluteIndex(relative.y1),
@@ -38,8 +38,8 @@ export class IndexUtils {
 
   public static getAbsoluteRangeFromPoint(
     totalLength: number,
-    point: Point,
-  ): IndexRange<AbsoluteIndex> {
+    point: Point<number>,
+  ): IndexArea<AbsoluteIndex> {
     const x = IndexUtils.getAbsoluteIndexFromFraction(point.x, totalLength);
     const y = IndexUtils.getAbsoluteIndexFromFraction(point.y, totalLength);
     return { x1: x, y1: y, x2: x, y2: y };
@@ -47,9 +47,9 @@ export class IndexUtils {
 
   public static getAbsoluteRangeFromPoints(
     totalLength: number,
-    start: Point,
-    end: Point,
-  ): IndexRange<AbsoluteIndex> {
+    start: Point<number>,
+    end: Point<number>,
+  ): IndexArea<AbsoluteIndex> {
     const [x1, x2] = [start.x, end.x]
       .sort()
       .map((value) =>
@@ -87,9 +87,9 @@ export class IndexUtils {
     T extends Token = Token,
     E extends Entity<T> = Entity<T>,
   >(
-    absolute: IndexRange<AbsoluteIndex>,
+    absolute: IndexArea<AbsoluteIndex>,
     subunits: Subunit<E>[],
-  ): IndexRange<RelativeIndex<T, E>> {
+  ): IndexArea<RelativeIndex<T, E>> {
     return {
       x1: IndexUtils.getRelativeIndex(absolute.x1, subunits),
       y1: IndexUtils.getRelativeIndex(absolute.y1, subunits),
