@@ -57,16 +57,6 @@ export class Axes<S extends Subunit = Subunit> extends EventTarget {
 
     this._root.replaceChildren(...this._template.children);
 
-    // this.#addTickLabel(
-    //   this.#axesGroup,
-    //   -style.ticks.labelGap,
-    //   -style.ticks.labelGap,
-    //   "0",
-    //   "end",
-    //   "auto",
-    //   false,
-    // );
-
     this._addTicks(
       this._root.querySelector(".pv-ticks")!,
       subunits,
@@ -77,6 +67,15 @@ export class Axes<S extends Subunit = Subunit> extends EventTarget {
   private _addTicks(root: SVGGElement, subunits: Subunit[], style: AxesStyle) {
     const axes = ["x", "y"] as unknown as [Axis, Axis];
     const total = Utils.sum(subunits.map((subunit) => subunit.length));
+
+    this.#addTickLabel(
+      root,
+      -style.tickLabelGap,
+      -style.tickLabelGap,
+      "0",
+      true,
+      "pv-tick-label-origin",
+    );
 
     const interval =
       typeof style.interval === "number"
@@ -158,7 +157,7 @@ export class Axes<S extends Subunit = Subunit> extends EventTarget {
     x: number,
     y: number,
     content: string,
-    addBackground = true,
+    addBackground: boolean = true,
     labelClass?: string,
     backgroundClass?: string,
   ) {

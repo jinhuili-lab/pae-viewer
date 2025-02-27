@@ -91,6 +91,11 @@ export class PaeViewer<
       text-anchor: middle;
     }
 
+    .pv-tick-label-origin {
+      text-anchor: end;
+      dominant-baseline: auto;
+    }
+
     .pv-tick-label-x {
       text-anchor: middle;
       dominant-baseline: auto;
