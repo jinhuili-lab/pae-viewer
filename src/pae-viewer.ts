@@ -79,7 +79,7 @@ export class PaeViewer<
 
     .pv-axes > line {
       stroke: var(--pv-chart-color);
-      stroke-width: var(pv-chart-line-thickness);
+      stroke-width: var(--pv-chart-line-thickness);
     }
 
     .pv-tick {
@@ -109,6 +109,10 @@ export class PaeViewer<
     .pv-region-label > text {
       text-anchor: middle;
       dominant-baseline: middle;
+    }
+
+    .pv-axes {
+      pointer-events: none;
     }
 
     .pv-dividers {
