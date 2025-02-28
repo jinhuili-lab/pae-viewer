@@ -107,9 +107,16 @@ export class PaeViewer<
       opacity: 0.8;
     }
 
+    .pv-selection-line {
+      stroke: var(--pv-selection-color);
+      stroke-width: 0.5%;
+      stroke-dasharray: 0.5%;
+    }
+
     .pv-selection-marker {
       stroke-width: var(--pv-marker-outline-thickness);
       stroke: var(--pv-marker-outline-color);
+      fill: var(--pv-selection-color);
     }
 
     .pv-selection-marker-x {
