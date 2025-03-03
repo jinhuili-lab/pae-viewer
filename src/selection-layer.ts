@@ -227,13 +227,13 @@ export class SelectionLayer extends EventTarget {
   }
 
   private _areOverlapping(a: Interval<number>, b: Interval<number>): boolean {
-    return a.start > b.end || a.end < b.start;
+    return a.end > b.start && a.start < b.end;
   }
 
   private _displayAreaSelection(root: SVGGElement, selection: AreaSelection) {
     root.replaceChildren(
       ...this._createSelectionRect(selection.area),
-      // ...this._createIntervalLines(selection.intervals),
+      ...this._createIntervalLines(selection.intervals),
     );
   }
 
@@ -272,7 +272,7 @@ export class SelectionLayer extends EventTarget {
     };
 
     const createLine = (x1: number, y1: number, x2: number, y2: number) => {
-      return this._createLine({ x: x1, y: y1 }, { x: x2, y: y2 });
+      return this._createLine(x1, y1, x2, y2, ["pv-selection-rect-line"]);
     };
 
     return [
@@ -312,21 +312,48 @@ export class SelectionLayer extends EventTarget {
     ];
   }
 
-  // private _createIntervalLines(intervals: AreaIntervals): SVGElement[] {
-  //   const createMarker = (value: number, handle: string): SVGCircleElement => {
-  //     return this._createMarker(
-  //       { x: value, y: value },
-  //       `pv-selected-interval-marker-${handle}`,
-  //     );
-  //   };
-  //
-  //   return [
-  //     createMarker(intervals.x.start, "x"),
-  //     createMarker(intervals.x.end, "x"),
-  //     createMarker(intervals.y.start, "y"),
-  //     createMarker(intervals.y.end, "y"),
-  //   ];
-  // }
+  private _createIntervalLines(intervals: AreaIntervals): SVGElement[] {
+    const createMarker = (value: number, handle: string): SVGCircleElement => {
+      return this._createMarker(
+        { x: value, y: value },
+        `pv-selected-interval-marker-${handle}`,
+      );
+    };
+
+    const createDiagonalLine = (
+      interval: Interval<number>,
+      handle: string,
+    ): SVGLineElement => {
+      return this._createLine(
+        interval.start,
+        interval.start,
+        interval.end,
+        interval.end,
+        [`pv-selected-interval-line`, `pv-selected-interval-line-${handle}`],
+      );
+    };
+
+    if (intervals.composite) {
+      return [
+        createDiagonalLine(intervals.a, "a"),
+        createDiagonalLine(intervals.b, "b"),
+        createDiagonalLine(intervals.c, "c"),
+        createMarker(intervals.a.start, "a"),
+        createMarker(intervals.b.start, "a-b"),
+        createMarker(intervals.b.end, "b-c"),
+        createMarker(intervals.c.end, "c"),
+      ];
+    } else {
+      return [
+        createDiagonalLine(intervals.x, "x"),
+        createDiagonalLine(intervals.y, "y"),
+        createMarker(intervals.x.start, "x"),
+        createMarker(intervals.x.end, "x"),
+        createMarker(intervals.y.start, "y"),
+        createMarker(intervals.y.end, "y"),
+      ];
+    }
+  }
 
   private _createRect(area: IndexArea<number>): SVGRectElement {
     return SvgUtils.createElement("rect", {
@@ -346,7 +373,7 @@ export class SelectionLayer extends EventTarget {
     cssClass?: string,
   ): SVGCircleElement {
     return SvgUtils.createElement("circle", {
-      classes: ["pv-selection-marker", cssClass ?? ""],
+      classes: ["pv-selection-marker", ...(cssClass ? [cssClass] : [])],
       attributes: {
         cx: Utils.toPercentage(point.x),
         cy: Utils.toPercentage(point.y),
@@ -356,16 +383,19 @@ export class SelectionLayer extends EventTarget {
   }
 
   private _createLine(
-    start: Point<number>,
-    end: Point<number>,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    classes: string[],
   ): SVGLineElement {
     return SvgUtils.createElement("line", {
-      classes: ["pv-selection-line"],
+      classes: classes,
       attributes: {
-        x1: Utils.toPercentage(start.x),
-        y1: Utils.toPercentage(start.y),
-        x2: Utils.toPercentage(end.x),
-        y2: Utils.toPercentage(end.y),
+        x1: Utils.toPercentage(x1),
+        y1: Utils.toPercentage(y1),
+        x2: Utils.toPercentage(x2),
+        y2: Utils.toPercentage(y2),
       },
     });
   }

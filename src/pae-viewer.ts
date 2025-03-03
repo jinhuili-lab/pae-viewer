@@ -50,6 +50,7 @@ export class PaeViewer<
       --pv-chart-line-thickness: 0.2%;
       --pv-font-size: 0.95em;
       --pv-selection-outline-color: var(--pv-selection-color);
+      --pv-selection-line-width: 0.5%;
       --pv-marker-outline-color: var(--pv-selection-color);
       --pv-marker-outline-thickness: 0.2%;
       --pv-marker-size: 1%;
@@ -108,16 +109,40 @@ export class PaeViewer<
       opacity: 0.8;
     }
 
-    .pv-selection-line {
+    .pv-selection-rect-line {
       stroke: var(--pv-selection-color);
-      stroke-width: 0.5%;
-      stroke-dasharray: 0.5%;
+      stroke-width: var(--pv-selection-line-width);
+      stroke-dasharray: var(--pv-selection-line-width);
     }
 
     .pv-selection-marker {
       stroke-width: var(--pv-marker-outline-thickness);
       stroke: var(--pv-marker-outline-color);
       fill: var(--pv-selection-color);
+    }
+
+    .pv-selected-interval-line {
+      stroke-width: var(--pv-selection-line-width);
+    }
+
+    .pv-selected-interval-line-x {
+      stroke: var(--pv-color-x);
+    }
+
+    .pv-selected-interval-line-y {
+      stroke: var(--pv-color-y);
+    }
+
+    .pv-selected-interval-line-a {
+      stroke: var(--pv-color-a);
+    }
+
+    .pv-selected-interval-line-b {
+      stroke: var(--pv-color-b);
+    }
+
+    .pv-selected-interval-line-c {
+      stroke: var(--pv-color-c);
     }
 
     .pv-selected-interval-marker-x {
@@ -128,8 +153,12 @@ export class PaeViewer<
       fill: var(--pv-color-y);
     }
 
-    .pv-selected-interval-marker-overlap {
-      fill: var(--pv-color-overlap);
+    .pv-selected-interval-marker-a {
+      fill: var(--pv-color-a);
+    }
+
+    .pv-selected-interval-marker-c {
+      fill: var(--pv-color-c);
     }
 
     .pv-tick-label-y {
