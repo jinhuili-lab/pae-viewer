@@ -12,6 +12,10 @@ export class SvgUtils {
 
     options?.root?.appendChild(element);
 
+    if (options?.id) {
+      element.id = options.id;
+    }
+
     if (options?.classes) {
       element.classList.add(...options?.classes);
     }
@@ -22,6 +26,10 @@ export class SvgUtils {
 
     if (options?.textContent) {
       element.textContent = options.textContent;
+    }
+
+    if (options?.children) {
+      element.append(...options.children);
     }
 
     return element;
@@ -104,14 +112,56 @@ export class SvgUtils {
       y0: Math.min(...boxes.map((box) => box.y)),
       x1: Math.max(...boxes.map((box) => box.x + box.width)),
       y1: Math.max(...boxes.map((box) => box.y + box.height)),
-    }
+    };
 
     return {
       x: corners.x0,
       y: corners.y0,
       width: corners.x1 - corners.x0,
       height: corners.y1 - corners.y0,
-    }
+    };
+  }
+
+  public static createStripePattern<E>(
+    id: string,
+    color1: string,
+    color2: string,
+    width1: number = 1,
+    width2: number = 1,
+    angle: number = 45,
+  ): SVGPatternElement {
+    const size = width1 + width2;
+
+    return SvgUtils.createElement("pattern", {
+      id: id,
+      attributes: {
+        width: `${size}%`,
+        height: `${size}%`,
+        patternUnits: "userSpaceOnUse",
+        patternTransform: `rotate(${angle})`,
+      },
+      children: [
+        SvgUtils.createElement("rect", {
+          attributes: {
+            x: "0",
+            y: "0",
+            width: `${size}%`,
+            height: `${size}%`,
+            fill: color1,
+          },
+        }),
+        SvgUtils.createElement("line", {
+          attributes: {
+            x1: "0",
+            y1: "0",
+            x2: "0",
+            y2: `${size}%`,
+            "stroke-width": `${size}%`,
+            stroke: color2,
+          },
+        }),
+      ],
+    });
   }
 }
 
@@ -121,6 +171,7 @@ export interface ElementOptions<E extends Element = Element> {
   classes?: string[];
   attributes?: Partial<Record<keyof E | string, any>>;
   textContent?: string;
+  children?: SVGElement[];
 }
 
 export interface Bounds {

@@ -12,50 +12,84 @@ import { SvgUtils } from "./svg-utils.js";
 export class SelectionLayer extends EventTarget {
   private readonly _defs: SVGDefsElement = Utils.fromHtml(
     `
-    <defs>
-      <linearGradient id="rangeMarkerLower"
-                      gradientTransform="rotate(45 0.5 0.5)">
-        <stop offset="0%" stop-color="var(--pv-color-x)" />
-        <stop offset="50%" stop-color="var(--pv-color-x)" />
-        <stop offset="50%" stop-color="magenta" />
-        <stop offset="100%" stop-color="magenta" />
-      </linearGradient>
-      <linearGradient id="rangeMarkerLowerReversed"
-                      gradientTransform="rotate(45 0.5 0.5)">
-        <stop offset="0%" stop-color="orange" />
-        <stop offset="50%" stop-color="orange" />
-        <stop offset="50%" stop-color="var(--pv-color-overlap)" />
-        <stop offset="100%" stop-color="var(--pv-color-overlap)" />
-      </linearGradient>
-      <linearGradient id="rangeMarkerUpper"
-                      gradientTransform="rotate(45 0.5 0.5)">
-        <stop offset="0%" stop-color="var(--pv-color-overlap)" />
-        <stop offset="50%" stop-color="var(--pv-color-overlap)" />
-        <stop offset="50%" stop-color="orange" />
-        <stop offset="100%" stop-color="orange" />
-      </linearGradient>
-      <linearGradient id="rangeMarkerUpperReversed"
-                      gradientTransform="rotate(45 0.5 0.5)">
-        <stop offset="0%" stop-color="var(--pv-color-overlap)" />
-        <stop offset="50%" stop-color="var(--pv-color-overlap)" />
-        <stop offset="50%" stop-color="var(--pv-color-x)" />
-        <stop offset="100%" stop-color="var(--pv-color-x)" />
-      </linearGradient>
-    </defs>
+    <svg xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="rangeMarkerLower"
+                        gradientTransform="rotate(45 0.5 0.5)">
+          <stop offset="0%" stop-color="var(--pv-color-x)" />
+          <stop offset="50%" stop-color="var(--pv-color-x)" />
+          <stop offset="50%" stop-color="magenta" />
+          <stop offset="100%" stop-color="magenta" />
+        </linearGradient>
+        <linearGradient id="rangeMarkerLowerReversed"
+                        gradientTransform="rotate(45 0.5 0.5)">
+          <stop offset="0%" stop-color="orange" />
+          <stop offset="50%" stop-color="orange" />
+          <stop offset="50%" stop-color="var(--pv-color-overlap)" />
+          <stop offset="100%" stop-color="var(--pv-color-overlap)" />
+        </linearGradient>
+        <linearGradient id="rangeMarkerUpper"
+                        gradientTransform="rotate(45 0.5 0.5)">
+          <stop offset="0%" stop-color="var(--pv-color-overlap)" />
+          <stop offset="50%" stop-color="var(--pv-color-overlap)" />
+          <stop offset="50%" stop-color="orange" />
+          <stop offset="100%" stop-color="orange" />
+        </linearGradient>
+        <linearGradient id="rangeMarkerUpperReversed"
+                        gradientTransform="rotate(45 0.5 0.5)">
+          <stop offset="0%" stop-color="var(--pv-color-overlap)" />
+          <stop offset="50%" stop-color="var(--pv-color-overlap)" />
+          <stop offset="50%" stop-color="var(--pv-color-x)" />
+          <stop offset="100%" stop-color="var(--pv-color-x)" />
+        </linearGradient>
+      </defs>
+    </svg>
   `,
   ).querySelector("defs")!;
 
   private readonly _root: SVGGElement;
+  private readonly _displayGroup: SVGGElement = SvgUtils.createElement("g");
 
   public constructor(root: SVGGElement, matrix: SVGImageElement) {
     super();
     this._root = root;
     this._root.replaceChildren();
 
-    this._setupListeners(this._root, matrix);
+    const createStripes = (
+      handle1: string,
+      handle2: string,
+    ): SVGPatternElement =>
+      SvgUtils.createStripePattern(
+        this._getPatternId(handle1, handle2),
+        `var(--pv-color-${handle1})`,
+        `var(--pv-color-${handle2})`,
+      );
+
+    this._defs.append(
+      createStripes("x", "y"),
+      createStripes("a", "b"),
+      createStripes("a", "c"),
+      createStripes("b", "c"),
+    );
+
+    this._root.replaceChildren(this._defs, this._displayGroup);
+
+    this._setupListeners(this._root, matrix, this._displayGroup);
   }
 
-  private _setupListeners(root: SVGGElement, matrix: SVGImageElement) {
+  private _getPatternId(handle1: string, handle2: string): string {
+    return `pv-selection-pattern-${handle1}-${handle2}`;
+  }
+
+  private _getPatternUrl(handle1: string, handle2: string): string {
+    return `url(#${this._getPatternId(handle1, handle2)})`;
+  }
+
+  private _setupListeners(
+    root: SVGGElement,
+    matrix: SVGImageElement,
+    displayGroup: SVGGElement,
+  ) {
     let start: Point<number> | null = null;
     let selectingArea: boolean = false;
 
@@ -77,7 +111,7 @@ export class SelectionLayer extends EventTarget {
             Utils.getRelativeMousePosition(event),
           );
 
-          this._displayAreaSelection(root, selection);
+          this._displayAreaSelection(displayGroup, selection);
 
           this.dispatchEvent(
             Utils.createEvent<SelectAreaEvent>("select-area", selection),
@@ -121,7 +155,7 @@ export class SelectionLayer extends EventTarget {
 
         const selection = this._getAreaSelection(start, end);
 
-        this._displayAreaSelection(root, selection);
+        this._displayAreaSelection(displayGroup, selection);
 
         this.dispatchEvent(
           Utils.createEvent<SelectingAreaEvent>("selecting-area", selection),
@@ -140,7 +174,7 @@ export class SelectionLayer extends EventTarget {
         };
 
         const selection = this._getAreaSelection(start, end);
-        this._displayAreaSelection(root, selection);
+        this._displayAreaSelection(displayGroup, selection);
 
         this.dispatchEvent(
           Utils.createEvent<SelectAreaEvent>("select-area", selection),
@@ -180,20 +214,27 @@ export class SelectionLayer extends EventTarget {
   private _getIntervals(area: IndexArea<number>): AreaIntervals {
     const x = { start: area.x1, end: area.x2 };
     const y = { start: area.y1, end: area.y2 };
-    return { x, y, overlap: this._getOverlap(x, y) };
+
+    if (this._areOverlapping(x, y)) {
+      const [a, b, c] = Array.from(
+        Utils.pairwise([area.x1, area.y1, area.x2, area.y2].sort()),
+      ).map(([start, end]) => ({ start, end }));
+
+      return { composite: true, a, b, c };
+    } else {
+      return { composite: false, x, y };
+    }
   }
 
-  private _getOverlap(
-    a: Interval<number>,
-    b: Interval<number>,
-  ): Interval<number> | undefined {
-    return a.start > b.end || a.end < b.start
-      ? undefined
-      : { start: Math.max(a.start, b.start), end: Math.min(a.end, b.end) };
+  private _areOverlapping(a: Interval<number>, b: Interval<number>): boolean {
+    return a.start > b.end || a.end < b.start;
   }
 
   private _displayAreaSelection(root: SVGGElement, selection: AreaSelection) {
-    root.replaceChildren(...this._createSelectionRect(selection.area));
+    root.replaceChildren(
+      ...this._createSelectionRect(selection.area),
+      // ...this._createIntervalLines(selection.intervals),
+    );
   }
 
   /**
@@ -203,7 +244,7 @@ export class SelectionLayer extends EventTarget {
    * The input rectangle is defined with x1/2 and y1/2, corresponding to these
    * corner points:
    *
-   *   (x1|y1)-(x2|y1)
+   *   (x1|y1`)-(x2|y1)
    *      |       |
    *      |       |
    *   (x1|y2)-(x2|y2)
@@ -271,6 +312,22 @@ export class SelectionLayer extends EventTarget {
     ];
   }
 
+  // private _createIntervalLines(intervals: AreaIntervals): SVGElement[] {
+  //   const createMarker = (value: number, handle: string): SVGCircleElement => {
+  //     return this._createMarker(
+  //       { x: value, y: value },
+  //       `pv-selected-interval-marker-${handle}`,
+  //     );
+  //   };
+  //
+  //   return [
+  //     createMarker(intervals.x.start, "x"),
+  //     createMarker(intervals.x.end, "x"),
+  //     createMarker(intervals.y.start, "y"),
+  //     createMarker(intervals.y.end, "y"),
+  //   ];
+  // }
+
   private _createRect(area: IndexArea<number>): SVGRectElement {
     return SvgUtils.createElement("rect", {
       classes: ["pv-selection-rect"],
@@ -279,6 +336,7 @@ export class SelectionLayer extends EventTarget {
         y: Utils.toPercentage(area.y1),
         width: Utils.toPercentage(area.x2 - area.x1),
         height: Utils.toPercentage(area.y2 - area.y1),
+        fill: this._getPatternUrl("x", "y"),
       },
     });
   }
@@ -322,7 +380,7 @@ export type SelectingAreaEvent = CustomEvent<AreaSelection>;
 export interface AreaSelection {
   points: AreaPoints;
   area: IndexArea<number>;
-  intervals: AreaIntervals;
+  intervals: AreaIntervals | AreaCompositeIntervals;
 }
 
 export interface AreaPoints {
@@ -330,8 +388,17 @@ export interface AreaPoints {
   end: Point<number>;
 }
 
-export interface AreaIntervals {
+type AreaIntervals = AreaSimpleIntervals | AreaCompositeIntervals;
+
+export interface AreaSimpleIntervals {
+  composite: false;
   x: Interval<number>;
   y: Interval<number>;
-  overlap?: Interval<number>;
+}
+
+export interface AreaCompositeIntervals {
+  composite: true;
+  a: Interval<number>;
+  b: Interval<number>;
+  c: Interval<number>;
 }

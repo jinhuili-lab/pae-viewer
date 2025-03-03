@@ -53,9 +53,11 @@ export class PaeViewer<
       --pv-marker-outline-color: var(--pv-selection-color);
       --pv-marker-outline-thickness: 0.2%;
       --pv-marker-size: 1%;
-      --pv-color-x: cyan;
+      --pv-color-x: deepskyblue;
       --pv-color-y: orange;
-      --pv-color-overlap: magenta;
+      --pv-color-a: steelblue;
+      --pv-color-b: palevioletred;
+      --pv-color-c: gold;
       font-size: var(--pv-font-size);
       user-select: none;
     }
@@ -103,7 +105,6 @@ export class PaeViewer<
     }
 
     .pv-selection-rect {
-      fill: var(--pv-selection-color);
       opacity: 0.8;
     }
 
@@ -119,15 +120,15 @@ export class PaeViewer<
       fill: var(--pv-selection-color);
     }
 
-    .pv-selection-marker-x {
+    .pv-selected-interval-marker-x {
       fill: var(--pv-color-x);
     }
 
-    .pv-selection-marker-y {
+    .pv-selected-interval-marker-y {
       fill: var(--pv-color-y);
     }
 
-    .pv-selection-marker-overlap {
+    .pv-selected-interval-marker-overlap {
       fill: var(--pv-color-overlap);
     }
 
